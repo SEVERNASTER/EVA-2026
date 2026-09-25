@@ -26,6 +26,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
+        {/*
+          THESIS: Sign-in as a dark operating console, not a marketing hero or split-brand splash.
+          OWN-WORLD: Vercel dashboard grammar — #000 ground, hairline zinc borders, white primary, Geist.
+          STORY: Identify yourself, land in the panel your role owns, never cross into another role.
+          FIRST VIEWPORT: Centered 380px panel on a slow grid; title, fields, white Continuar; demo accounts folded.
+          FORM: Canon — Vercel dashboard. FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+        */}
         {children}
       </body>
     </html>
