@@ -40,11 +40,12 @@ npm run db:down
 
 Password: `eva2026` (email ya confirmado). Confirmación de mail **off** en local.
 
-| Rol | Email |
-| --- | --- |
-| admin | `admin@eva.local` |
-| instructor | `instructor@eva.local` |
-| estudiante | `estudiante@eva.local` |
+| Rol | Email | Header |
+| --- | --- | --- |
+| admin | `dennis-admin@eva.local` | Dennis |
+| instructor | `jhonatan-instructor@eva.local` | Jhonatan |
+| estudiante | `luciana-estudiante@eva.local` | Luciana |
+| estudiante | `rodrigo-estudiante@eva.local` | Rodrigo |
 
 `/registro` → rol `estudiante` only.
 

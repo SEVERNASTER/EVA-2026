@@ -30,9 +30,10 @@ export default function LoginPage() {
           Cuentas de demostración
         </summary>
         <ul className="mt-3 space-y-1 font-mono text-[11px] text-zinc-500">
-          <li>admin@eva.local</li>
-          <li>instructor@eva.local</li>
-          <li>estudiante@eva.local</li>
+          <li>dennis-admin@eva.local</li>
+          <li>jhonatan-instructor@eva.local</li>
+          <li>luciana-estudiante@eva.local</li>
+          <li>rodrigo-estudiante@eva.local</li>
           <li>contraseña: eva2026</li>
         </ul>
       </details>

@@ -26,11 +26,11 @@ values
     '11111111-1111-1111-1111-111111111111',
     'authenticated',
     'authenticated',
-    'admin@eva.local',
+    'dennis-admin@eva.local',
     extensions.crypt('eva2026', extensions.gen_salt('bf')),
     now(),
     '{"provider":"email","providers":["email"]}',
-    '{"full_name":"Ana Admin"}',
+    '{"full_name":"Dennis"}',
     now(),
     now(),
     '',
@@ -43,11 +43,11 @@ values
     '22222222-2222-2222-2222-222222222222',
     'authenticated',
     'authenticated',
-    'instructor@eva.local',
+    'jhonatan-instructor@eva.local',
     extensions.crypt('eva2026', extensions.gen_salt('bf')),
     now(),
     '{"provider":"email","providers":["email"]}',
-    '{"full_name":"Iván Instructor"}',
+    '{"full_name":"Jhonatan"}',
     now(),
     now(),
     '',
@@ -60,11 +60,28 @@ values
     '33333333-3333-3333-3333-333333333333',
     'authenticated',
     'authenticated',
-    'estudiante@eva.local',
+    'luciana-estudiante@eva.local',
     extensions.crypt('eva2026', extensions.gen_salt('bf')),
     now(),
     '{"provider":"email","providers":["email"]}',
-    '{"full_name":"Elena Estudiante"}',
+    '{"full_name":"Luciana"}',
+    now(),
+    now(),
+    '',
+    '',
+    '',
+    ''
+  ),
+  (
+    '00000000-0000-0000-0000-000000000000',
+    '44444444-4444-4444-4444-444444444444',
+    'authenticated',
+    'authenticated',
+    'rodrigo-estudiante@eva.local',
+    extensions.crypt('eva2026', extensions.gen_salt('bf')),
+    now(),
+    '{"provider":"email","providers":["email"]}',
+    '{"full_name":"Rodrigo"}',
     now(),
     now(),
     '',
@@ -93,16 +110,25 @@ select
   created_at,
   created_at
 from auth.users
-where email in ('admin@eva.local', 'instructor@eva.local', 'estudiante@eva.local');
+where email in (
+  'dennis-admin@eva.local',
+  'jhonatan-instructor@eva.local',
+  'luciana-estudiante@eva.local',
+  'rodrigo-estudiante@eva.local'
+);
 
 update public.profiles
-set role = 'admin', full_name = 'Ana Admin'
+set role = 'admin', full_name = 'Dennis'
 where id = '11111111-1111-1111-1111-111111111111';
 
 update public.profiles
-set role = 'instructor', full_name = 'Iván Instructor'
+set role = 'instructor', full_name = 'Jhonatan'
 where id = '22222222-2222-2222-2222-222222222222';
 
 update public.profiles
-set role = 'estudiante', full_name = 'Elena Estudiante'
+set role = 'estudiante', full_name = 'Luciana'
 where id = '33333333-3333-3333-3333-333333333333';
+
+update public.profiles
+set role = 'estudiante', full_name = 'Rodrigo'
+where id = '44444444-4444-4444-4444-444444444444';
