@@ -18,6 +18,7 @@ function parseCourse(formData: FormData) {
   const notaMinima = num(formData, "nota_minima");
   const asistenciaMinima = num(formData, "asistencia_minima");
   const precioRegular = num(formData, "precio_regular");
+  const precioAuxiliar = num(formData, "precio_auxiliar");
   const published = formData.get("published") === "on";
 
   if (!name || !content || !schedule || !instructorId) {
@@ -39,6 +40,9 @@ function parseCourse(formData: FormData) {
   if (!Number.isFinite(precioRegular) || precioRegular < 0) {
     return { error: "El precio regular no puede ser negativo." };
   }
+  if (!Number.isFinite(precioAuxiliar) || precioAuxiliar < 0) {
+    return { error: "El precio de auxiliar ad-honorem no puede ser negativo." };
+  }
 
   return {
     payload: {
@@ -50,6 +54,7 @@ function parseCourse(formData: FormData) {
       nota_minima: notaMinima,
       asistencia_minima: asistenciaMinima,
       precio_regular: precioRegular,
+      precio_auxiliar: precioAuxiliar,
       published,
     },
   };
