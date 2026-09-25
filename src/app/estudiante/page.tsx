@@ -1,19 +1,24 @@
-import { redirect } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
-import { CoursesPlaceholder } from "@/components/courses-placeholder";
-import { getSessionProfile } from "@/lib/auth/profile";
+import { CourseCatalog } from "@/components/course-catalog";
+import { requireRole } from "@/lib/auth/guards";
+import type { Course } from "@/lib/courses/types";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function StudentPage() {
-  const profile = await getSessionProfile();
-  if (!profile) {
-    redirect("/login");
-  }
+  const profile = await requireRole("estudiante");
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("courses")
+    .select("*, instructor:profiles!instructor_id(full_name)")
+    .eq("published", true)
+    .order("name");
 
   return (
     <AppShell role="estudiante" name={profile.full_name}>
-      <CoursesPlaceholder
+      <CourseCatalog
         title="Oferta de cursos"
-        body="Cuando un curso esté publicado, aparecerá en este listado."
+        empty="No hay cursos publicados."
+        courses={(data ?? []) as Course[]}
       />
     </AppShell>
   );
