@@ -299,3 +299,64 @@ values
     80,
     390
   );
+
+update public.courses
+set precio_auxiliar = round((precio_regular * 0.5)::numeric, 2)
+where published;
+
+-- Luciana: preinscripción regular pendiente de pago (Node.js)
+insert into public.enrollments (course_id, student_id, category, amount, status)
+select
+  id,
+  '33333333-3333-3333-3333-333333333333',
+  'regular',
+  precio_regular,
+  'pendiente_pago'
+from public.courses
+where name = 'Node.js: APIs REST y autenticación';
+
+-- Rodrigo: inscrito como auxiliar ad-honorem con pago en caja (Node.js)
+insert into public.enrollments (
+  course_id,
+  student_id,
+  category,
+  amount,
+  status,
+  settlement,
+  confirmed_at,
+  confirmed_by
+)
+select
+  id,
+  '44444444-4444-4444-4444-444444444444',
+  'auxiliar_ad_honorem',
+  precio_auxiliar,
+  'inscrito',
+  'caja',
+  now(),
+  '11111111-1111-1111-1111-111111111111'
+from public.courses
+where name = 'Node.js: APIs REST y autenticación';
+
+-- Luciana: inscrita con pago en caja (Git)
+insert into public.enrollments (
+  course_id,
+  student_id,
+  category,
+  amount,
+  status,
+  settlement,
+  confirmed_at,
+  confirmed_by
+)
+select
+  id,
+  '33333333-3333-3333-3333-333333333333',
+  'regular',
+  precio_regular,
+  'inscrito',
+  'caja',
+  now(),
+  '11111111-1111-1111-1111-111111111111'
+from public.courses
+where name = 'Git y colaboración en repositorios de equipo';
