@@ -1,49 +1,57 @@
 # EVA 2026
 
-Plataforma de formación continua con certificación digital verificable (proyecto universitario).
+Next.js + TypeScript + Tailwind + Supabase. Auth local con Docker.
 
-**Stack:** Next.js + TypeScript + Tailwind + Supabase.
+## Setup
 
-Dos deploys, no tres: la app (UI + Route Handlers) y el proyecto de Supabase (Postgres, Auth, Storage, PostgREST).
-
-## Arranque
+Requisitos: Node, Docker Desktop **running**.
 
 ```bash
 cp .env.example .env.local
 npm install
+npm run db:up
 npm run dev
 ```
 
-Abre [http://localhost:3000](http://localhost:3000). El backend de Next responde en [http://localhost:3000/api/health](http://localhost:3000/api/health).
+App: http://localhost:3000  
+Studio: http://127.0.0.1:54323  
+API: http://127.0.0.1:54321  
+Postgres: `postgresql://postgres:postgres@127.0.0.1:54322/postgres`
 
-## Supabase local (Docker)
+`.env.example` son las keys **locales por defecto** del CLI. No las mezclar con las de un proyecto cloud.
 
-Hace falta Docker Desktop. Cada persona tiene su propia instancia; no necesitan la cuenta de la org.
+## `npm run db:up` (`supabase start`)
+
+Primera vez: Docker **pull** de ~10 imágenes (Postgres, GoTrue, Kong, PostgREST, Studio, Storage, Realtime, Edge, Analytics, Mailpit, …). Varios GB. 5–15 min según red. **Normal. Una sola vez.**
+
+No usamos todo ese stack. EVA necesita Postgres + Auth + Kong (+ PostgREST). Storage entra con PDFs. Studio es UI. El resto viene con el CLI; no hay flag “solo auth”.
+
+Siguientes arranques: segundos/minutos, sin re-descargar.
 
 ```bash
-npm run supabase:start
+npm run db:status
+npm run db:reset    # reaplica migrations + seed.sql
+npm run db:down
 ```
 
-Eso levanta Postgres, Auth, Storage y Studio. Las keys de `.env.example` son las de este stack local (no sirven en cloud).
+`db:reset` después de cambiar `supabase/migrations/` o `supabase/seed.sql`.
 
-```bash
-npm run supabase:status
-npm run supabase:stop
-```
+## Cuentas seed
 
-Las tablas van en `supabase/migrations/` (aún vacío a propósito: el esquema sale con las features).
+Password: `eva2026` (email ya confirmado). Confirmación de mail **off** en local.
 
-## Proyecto compartido (demo)
+| Rol | Email |
+| --- | --- |
+| admin | `admin@eva.local` |
+| instructor | `instructor@eva.local` |
+| estudiante | `estudiante@eva.local` |
 
-1. Crear una **organización** en [supabase.com](https://supabase.com) e invitar al equipo como Developer.
-2. Crear un proyecto y copiar URL + anon key + service role a `.env.local` (no subir keys de cloud).
-3. La `SUPABASE_SERVICE_ROLE_KEY` solo se usa en Route Handlers, nunca en el cliente.
+`/registro` → rol `estudiante` only.
 
-## Dónde va cada request
+## `docker-compose.yml`
 
-| Destino | Ejemplo | Qué es |
-| --- | --- | --- |
-| Next.js | `POST /api/...` en este dominio | Backend de la app (Vercel / `next dev`) |
-| Supabase | `*.supabase.co/rest/v1/...` | PostgREST (CRUD de tablas) |
+Postgres extra en **54332**. No es el de la app. No levantar junto a `db:up` salvo que haga falta un psql aparte.
 
-Los comandos de negocio (inscribir, emitir certificado) irán a `/api`. PostgREST no se despliega aparte: viene con el proyecto de Supabase.
+## Cloud (demo compartida)
+
+Org en supabase.com → invite Developers → pegar URL + anon + service_role en `.env.local`. `SUPABASE_SERVICE_ROLE_KEY` solo server-side.
