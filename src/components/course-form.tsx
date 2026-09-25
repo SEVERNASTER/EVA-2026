@@ -48,18 +48,19 @@ export function CourseForm({
         />
       </label>
 
+      <label className="flex flex-col gap-2 text-sm">
+        <span className="text-zinc-400">Horas</span>
+        <input
+          className={fieldClass}
+          name="hours"
+          type="number"
+          min={1}
+          required
+          defaultValue={course?.hours ?? 40}
+        />
+      </label>
+
       <div className="grid gap-4 sm:grid-cols-2">
-        <label className="flex flex-col gap-2 text-sm">
-          <span className="text-zinc-400">Horas</span>
-          <input
-            className={fieldClass}
-            name="hours"
-            type="number"
-            min={1}
-            required
-            defaultValue={course?.hours ?? 40}
-          />
-        </label>
         <label className="flex flex-col gap-2 text-sm">
           <span className="text-zinc-400">Precio regular (Bs)</span>
           <input
@@ -70,6 +71,18 @@ export function CourseForm({
             step="0.01"
             required
             defaultValue={course?.precio_regular ?? 0}
+          />
+        </label>
+        <label className="flex flex-col gap-2 text-sm">
+          <span className="text-zinc-400">Precio auxiliar ad-honorem (Bs)</span>
+          <input
+            className={fieldClass}
+            name="precio_auxiliar"
+            type="number"
+            min={0}
+            step="0.01"
+            required
+            defaultValue={course?.precio_auxiliar ?? 0}
           />
         </label>
       </div>
