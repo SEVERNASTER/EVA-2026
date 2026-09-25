@@ -21,12 +21,20 @@ export default async function AdminPage() {
         <h1 className="text-xl font-semibold tracking-tight text-white">
           Cursos
         </h1>
-        <Link
-          className="auth-submit inline-flex h-9 items-center rounded-md bg-white px-3 text-sm font-medium text-black"
-          href="/admin/cursos/nuevo"
-        >
-          Nuevo curso
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            className="text-sm text-zinc-400 hover:text-white"
+            href="/admin/inscripciones"
+          >
+            Inscripciones
+          </Link>
+          <Link
+            className="auth-submit inline-flex h-9 items-center rounded-md bg-white px-3 text-sm font-medium text-black"
+            href="/admin/cursos/nuevo"
+          >
+            Nuevo curso
+          </Link>
+        </div>
       </div>
 
       <div className="mt-8 overflow-x-auto">
