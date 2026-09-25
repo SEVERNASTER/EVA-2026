@@ -49,6 +49,8 @@ Password: `eva2026` (email ya confirmado). Confirmación de mail **off** en loca
 
 `/registro` → rol `estudiante` only.
 
+Seed de cursos: 10 publicados + 4 borradores (instructor Jhonatan). Tras cambiar `supabase/seed.sql`, `npm run db:reset`.
+
 ## `docker-compose.yml`
 
 Postgres extra en **54332**. No es el de la app. No levantar junto a `db:up` salvo que haga falta un psql aparte.
