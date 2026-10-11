@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { signOut } from "@/app/actions/auth";
+import { AppNav } from "@/components/app-nav";
 import { roleLabel, type UserRole } from "@/lib/auth/roles";
 
 export function AppShell({
@@ -18,15 +19,13 @@ export function AppShell({
           <p className="text-sm font-semibold tracking-tight text-white">EVA</p>
           <p className="mt-1 text-xs text-zinc-500">{roleLabel(role)}</p>
         </div>
-        <nav className="flex flex-1 flex-col gap-1 p-3 text-sm">
-          <span className="rounded-md bg-white/10 px-3 py-2 text-zinc-100">
-            Cursos
-          </span>
-        </nav>
+        <AppNav role={role} />
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex h-12 items-center justify-between border-b border-line px-4 md:px-6">
-          <p className="truncate text-sm text-zinc-400 md:hidden">EVA · {roleLabel(role)}</p>
+          <p className="truncate text-sm text-zinc-400 md:hidden">
+            EVA · {roleLabel(role)}
+          </p>
           <p className="hidden truncate text-sm text-zinc-400 md:block">
             {name || "Cuenta"}
           </p>
