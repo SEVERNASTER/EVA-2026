@@ -19,6 +19,7 @@ export default async function InstructorPage() {
         title="Tus cursos"
         empty="No tienes cursos asignados."
         courses={(data ?? []) as Course[]}
+        manageHref="/instructor/cursos"
       />
     </AppShell>
   );
