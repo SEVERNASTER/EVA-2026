@@ -11,15 +11,22 @@ import {
   type Enrollment,
   type ParticipantCategory,
 } from "@/lib/enrollments/types";
+import {
+  formatAttendance,
+  formatScore,
+  type CourseProgress,
+} from "@/lib/teaching/types";
 
 type State = { error: string } | { ok: true } | null;
 
 export function StudentCourseList({
   courses,
   enrollments,
+  progress = {},
 }: {
   courses: Course[];
   enrollments: Enrollment[];
+  progress?: Record<string, CourseProgress>;
 }) {
   const byCourse = useMemo(() => {
     return new Map(enrollments.map((row) => [row.course_id, row]));
@@ -42,6 +49,7 @@ export function StudentCourseList({
               <StudentCourseCard
                 course={course}
                 enrollment={byCourse.get(course.id)}
+                progress={progress[course.id]}
               />
             </li>
           ))}
@@ -54,9 +62,11 @@ export function StudentCourseList({
 function StudentCourseCard({
   course,
   enrollment,
+  progress,
 }: {
   course: Course;
   enrollment?: Enrollment;
+  progress?: CourseProgress;
 }) {
   const [category, setCategory] = useState<ParticipantCategory>("regular");
   const price = amountForCategory(
@@ -95,6 +105,13 @@ function StudentCourseCard({
           {categoryLabel(enrollment.category)}
           {" · "}
           {formatBs(enrollment.amount)}
+          {progress ? (
+            <span className="mt-1 block text-zinc-400">
+              Asistencia {formatAttendance(progress.present, progress.total)}
+              {" · "}
+              Nota {formatScore(progress.score)}
+            </span>
+          ) : null}
         </p>
       ) : (
         <form action={formAction} className="mt-4 flex flex-wrap items-end gap-3">
