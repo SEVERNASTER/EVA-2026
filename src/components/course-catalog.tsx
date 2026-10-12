@@ -1,13 +1,16 @@
+import Link from "next/link";
 import { formatBs, type Course } from "@/lib/courses/types";
 
 export function CourseCatalog({
   title,
   empty,
   courses,
+  manageHref,
 }: {
   title: string;
   empty: string;
   courses: Course[];
+  manageHref?: string;
 }) {
   return (
     <section>
@@ -26,12 +29,22 @@ export function CourseCatalog({
                 <p className="text-sm text-zinc-400">{formatBs(course.precio_regular)}</p>
               </div>
               <p className="mt-2 text-sm leading-6 text-zinc-500">{course.content}</p>
-              <p className="mt-3 text-xs text-zinc-500">
-                {course.hours} h · {course.schedule}
-                {course.instructor?.full_name
-                  ? ` · ${course.instructor.full_name}`
-                  : ""}
-              </p>
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xs text-zinc-500">
+                  {course.hours} h · {course.schedule}
+                  {course.instructor?.full_name
+                    ? ` · ${course.instructor.full_name}`
+                    : ""}
+                </p>
+                {manageHref ? (
+                  <Link
+                    className="text-sm text-zinc-300 underline-offset-4 hover:underline"
+                    href={`${manageHref}/${course.id}`}
+                  >
+                    Gestionar curso →
+                  </Link>
+                ) : null}
+              </div>
             </li>
           ))}
         </ul>
