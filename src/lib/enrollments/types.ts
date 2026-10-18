@@ -46,8 +46,24 @@ export function categoryLabel(category: ParticipantCategory) {
   }
 }
 
-export function enrollmentStatusLabel(status: EnrollmentStatus) {
-  return status === "inscrito" ? "Inscrito" : "Pendiente de pago";
+export function studentCategoryChoiceLabel(category: ParticipantCategory) {
+  return category === "beca" ? "Solicitar beca" : categoryLabel(category);
+}
+
+export function enrollmentStatusLabel(
+  status: EnrollmentStatus,
+  category?: ParticipantCategory,
+) {
+  if (status === "inscrito") return "Inscrito";
+  if (category === "beca") return "Solicitud de beca";
+  return "Pendiente de pago";
+}
+
+export function isScholarshipRequest(row: {
+  status: EnrollmentStatus;
+  category: ParticipantCategory;
+}) {
+  return row.status === "pendiente_pago" && row.category === "beca";
 }
 
 export function amountForCategory(
