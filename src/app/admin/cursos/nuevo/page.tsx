@@ -1,12 +1,11 @@
 import Link from "next/link";
-import { AppShell } from "@/components/app-shell";
 import { CourseForm } from "@/components/course-form";
 import { Icon } from "@/components/ui/icon";
 import { requireRole } from "@/lib/auth/guards";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function NewCoursePage() {
-  const profile = await requireRole("admin");
+  await requireRole("admin");
   const supabase = await createClient();
   const { data: instructors } = await supabase
     .from("profiles")
@@ -15,9 +14,9 @@ export default async function NewCoursePage() {
     .order("full_name");
 
   return (
-    <AppShell role="admin" name={profile.full_name}>
+    <div className="mx-auto w-full max-w-2xl">
       <Link
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
         href="/admin"
       >
         <Icon name="arrow_back" size={16} />
@@ -32,6 +31,6 @@ export default async function NewCoursePage() {
       <div className="mt-6">
         <CourseForm instructors={instructors ?? []} />
       </div>
-    </AppShell>
+    </div>
   );
 }
