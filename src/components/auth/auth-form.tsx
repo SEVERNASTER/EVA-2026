@@ -35,7 +35,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
         <label className="flex flex-col gap-2 text-sm">
           <span className="text-muted-foreground">Nombre</span>
           <input
-            className="auth-field h-10 rounded-md border border-border bg-input px-3 text-sm text-foreground"
+            className="auth-field h-11 rounded-2xl border border-border bg-background px-3.5 text-sm text-foreground"
             name="full_name"
             autoComplete="name"
             required
@@ -46,8 +46,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
       <label className="flex flex-col gap-2 text-sm">
         <span className="text-muted-foreground">Correo</span>
         <input
-          className="auth-field h-10 rounded-md border border-border bg-input px-3 text-sm text-foreground"
-          name="email"
+            className="auth-field h-11 rounded-2xl border border-border bg-background px-3.5 text-sm text-foreground"
+            name="email"
           type="email"
           autoComplete="email"
           required
@@ -57,8 +57,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
       <label className="flex flex-col gap-2 text-sm">
         <span className="text-muted-foreground">Contraseña</span>
         <input
-          className="auth-field h-10 rounded-md border border-border bg-input px-3 text-sm text-foreground"
-          name="password"
+            className="auth-field h-11 rounded-2xl border border-border bg-background px-3.5 text-sm text-foreground"
+            name="password"
           type="password"
           autoComplete={isLogin ? "current-password" : "new-password"}
           minLength={6}
@@ -67,13 +67,13 @@ export function AuthForm({ mode }: { mode: Mode }) {
       </label>
 
       {state?.error ? (
-        <p className="auth-error rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <p className="auth-error rounded-2xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {state.error}
         </p>
       ) : null}
 
       <button
-        className="auth-submit mt-1 h-10 rounded-md bg-primary text-sm font-medium text-primary-foreground disabled:opacity-60"
+        className="auth-submit mt-1 h-11 rounded-2xl bg-primary text-sm font-medium text-primary-foreground disabled:opacity-60"
         type="submit"
         disabled={pending}
       >

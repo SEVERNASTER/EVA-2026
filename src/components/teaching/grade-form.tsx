@@ -25,7 +25,7 @@ export function GradeForm({
       <div className="flex items-center gap-2">
         <input
           aria-label="Nota"
-          className="auth-field h-8 w-20 rounded-md border border-border bg-input px-2 text-right text-sm text-foreground"
+          className="auth-field h-9 w-20 rounded-2xl border border-border bg-background px-2 text-right text-sm text-foreground"
           name="score"
           type="number"
           min={0}

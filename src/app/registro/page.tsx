@@ -7,7 +7,7 @@ export default function RegisterPage() {
       <div className="mb-4 w-full max-w-[380px] flex justify-end">
         <ThemeToggle />
       </div>
-      <section className="auth-panel w-full max-w-[380px] rounded-xl border border-border bg-card p-8 shadow-lg">
+      <section className="auth-panel w-full max-w-[380px] rounded-[1.4rem] border border-border bg-card p-8 shadow-lg">
         <p className="text-lg font-semibold tracking-tight text-foreground">
           EVA
         </p>

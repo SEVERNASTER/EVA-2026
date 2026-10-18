@@ -107,7 +107,10 @@ export default async function InstructorCoursePage({
 
   return (
     <AppShell role="instructor" name={profile.full_name}>
-      <Link className="text-sm text-muted-foreground hover:text-foreground" href="/instructor">
+      <Link
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        href="/instructor"
+      >
         Volver
       </Link>
       <h1 className="mt-4 text-xl font-semibold tracking-tight text-foreground">

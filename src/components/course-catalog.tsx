@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { formatBs, type Course } from "@/lib/courses/types";
+import { Icon } from "@/components/ui/icon";
+import { Money } from "@/components/ui/money";
+import type { Course } from "@/lib/courses/types";
 
 export function CourseCatalog({
   title,
@@ -22,15 +24,16 @@ export function CourseCatalog({
           {courses.map((course) => (
             <li
               key={course.id}
-              className="rounded-lg border border-border bg-card px-5 py-4"
+              className="rounded-[1.4rem] border border-border bg-card px-5 py-4 shadow-sm"
             >
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <h2 className="text-sm font-medium text-foreground">{course.name}</h2>
-                <p className="text-sm text-muted-foreground">{formatBs(course.precio_regular)}</p>
+                <Money value={course.precio_regular} />
               </div>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">{course.content}</p>
               <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-                <p className="text-xs text-muted-foreground">
+                <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Icon name="schedule" size={14} />
                   {course.hours} h · {course.schedule}
                   {course.instructor?.full_name
                     ? ` · ${course.instructor.full_name}`
@@ -38,10 +41,11 @@ export function CourseCatalog({
                 </p>
                 {manageHref ? (
                   <Link
-                    className="text-sm text-foreground underline-offset-4 hover:underline"
+                    className="inline-flex items-center gap-1 rounded-2xl px-2.5 py-1.5 text-sm text-foreground transition-colors hover:bg-muted"
                     href={`${manageHref}/${course.id}`}
                   >
-                    Gestionar curso →
+                    Gestionar curso
+                    <Icon name="arrow_forward" size={16} />
                   </Link>
                 ) : null}
               </div>
