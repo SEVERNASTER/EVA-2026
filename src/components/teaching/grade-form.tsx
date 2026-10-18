@@ -25,7 +25,7 @@ export function GradeForm({
       <div className="flex items-center gap-2">
         <input
           aria-label="Nota"
-          className="auth-field h-8 w-20 rounded-md border border-line bg-input px-2 text-right text-sm text-foreground"
+          className="auth-field h-8 w-20 rounded-md border border-border bg-input px-2 text-right text-sm text-foreground"
           name="score"
           type="number"
           min={0}
@@ -35,7 +35,7 @@ export function GradeForm({
           defaultValue={score ?? ""}
         />
         <button
-          className="text-sm text-zinc-300 underline-offset-4 hover:underline disabled:opacity-50"
+          className="text-sm text-foreground underline-offset-4 hover:underline disabled:opacity-50"
           type="submit"
           disabled={pending}
         >
@@ -43,10 +43,10 @@ export function GradeForm({
         </button>
       </div>
       {state && "error" in state ? (
-        <p className="text-xs text-red-300">{state.error}</p>
+        <p className="text-xs text-destructive">{state.error}</p>
       ) : null}
       {state && "ok" in state && !pending ? (
-        <p className="text-xs text-emerald-300">Guardada.</p>
+        <p className="text-xs text-accent-foreground">Guardada.</p>
       ) : null}
     </form>
   );

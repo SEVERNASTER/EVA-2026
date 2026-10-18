@@ -29,14 +29,14 @@ export function DeleteSessionButton({
   return (
     <span className="inline-flex flex-col items-end gap-1">
       <button
-        className="text-zinc-500 hover:text-red-300 disabled:opacity-50"
+        className="text-muted-foreground hover:text-destructive disabled:opacity-50"
         type="button"
         disabled={pending}
         onClick={onClick}
       >
         {pending ? "Eliminando…" : "Eliminar"}
       </button>
-      {error ? <span className="text-xs text-red-300">{error}</span> : null}
+      {error ? <span className="text-xs text-destructive">{error}</span> : null}
     </span>
   );
 }

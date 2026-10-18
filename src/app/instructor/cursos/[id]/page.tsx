@@ -107,29 +107,29 @@ export default async function InstructorCoursePage({
 
   return (
     <AppShell role="instructor" name={profile.full_name}>
-      <Link className="text-sm text-zinc-500 hover:text-white" href="/instructor">
+      <Link className="text-sm text-muted-foreground hover:text-foreground" href="/instructor">
         Volver
       </Link>
-      <h1 className="mt-4 text-xl font-semibold tracking-tight text-white">
+      <h1 className="mt-4 text-xl font-semibold tracking-tight text-foreground">
         {typedCourse.name}
       </h1>
-      <p className="mt-2 text-sm text-zinc-500">
+      <p className="mt-2 text-sm text-muted-foreground">
         {typedCourse.hours} h · {typedCourse.schedule} · Nota mínima{" "}
         {Number(typedCourse.nota_minima)} · Asistencia mínima{" "}
         {Number(typedCourse.asistencia_minima)} %
       </p>
 
       <section className="mt-10">
-        <h2 className="text-sm font-medium text-zinc-300">Sesiones</h2>
+        <h2 className="text-sm font-medium text-foreground">Sesiones</h2>
         {sessions.length === 0 ? (
-          <p className="mt-4 text-sm text-zinc-500">
+          <p className="mt-4 text-sm text-muted-foreground">
             Aún no hay sesiones registradas.
           </p>
         ) : (
           <div className="mt-4 overflow-x-auto">
             <table className="w-full min-w-[560px] text-left text-sm">
-              <thead className="text-zinc-500">
-                <tr className="border-b border-line">
+              <thead className="text-muted-foreground">
+                <tr className="border-b border-border">
                   <th className="py-2 pr-3 font-medium">Fecha</th>
                   <th className="py-2 pr-3 font-medium">Tema</th>
                   <th className="py-2 font-medium"> </th>
@@ -141,18 +141,18 @@ export default async function InstructorCoursePage({
                     key={session.id}
                     className={
                       session.id === selected?.id
-                        ? "border-b border-line bg-white/5"
-                        : "border-b border-line"
+                        ? "border-b border-border bg-muted"
+                        : "border-b border-border"
                     }
                   >
-                    <td className="py-3 pr-3 text-zinc-100">
+                    <td className="py-3 pr-3 text-foreground">
                       {formatSessionDate(session.session_date)}
                     </td>
-                    <td className="py-3 pr-3 text-zinc-400">{session.topic}</td>
+                    <td className="py-3 pr-3 text-muted-foreground">{session.topic}</td>
                     <td className="py-3 text-right">
                       <div className="flex items-start justify-end gap-3">
                         <Link
-                          className="text-zinc-300 underline-offset-4 hover:underline"
+                          className="text-foreground underline-offset-4 hover:underline"
                           href={`/instructor/cursos/${id}?sesion=${session.id}`}
                           scroll={false}
                         >
@@ -171,23 +171,23 @@ export default async function InstructorCoursePage({
       </section>
 
       <section className="mt-12">
-        <h2 className="text-sm font-medium text-zinc-300">
+        <h2 className="text-sm font-medium text-foreground">
           Asistencia
           {selected
             ? ` · Sesión ${formatSessionDate(selected.session_date)}`
             : ""}
         </h2>
         {!selected ? (
-          <p className="mt-4 text-sm text-zinc-500">
+          <p className="mt-4 text-sm text-muted-foreground">
             Agrega una sesión para registrar la asistencia.
           </p>
         ) : roster.length === 0 ? (
-          <p className="mt-4 text-sm text-zinc-500">
+          <p className="mt-4 text-sm text-muted-foreground">
             El curso no tiene participantes inscritos.
           </p>
         ) : (
           <>
-            <p className="mt-2 text-sm text-zinc-500">{selected.topic}</p>
+            <p className="mt-2 text-sm text-muted-foreground">{selected.topic}</p>
             <AttendanceForm
               key={selected.id}
               courseId={id}
@@ -203,16 +203,16 @@ export default async function InstructorCoursePage({
       </section>
 
       <section className="mt-12">
-        <h2 className="text-sm font-medium text-zinc-300">Inscritos y notas</h2>
+        <h2 className="text-sm font-medium text-foreground">Inscritos y notas</h2>
         {roster.length === 0 ? (
-          <p className="mt-4 text-sm text-zinc-500">
+          <p className="mt-4 text-sm text-muted-foreground">
             El curso no tiene participantes inscritos.
           </p>
         ) : (
           <div className="mt-4 overflow-x-auto">
             <table className="w-full min-w-[640px] text-left text-sm">
-              <thead className="text-zinc-500">
-                <tr className="border-b border-line">
+              <thead className="text-muted-foreground">
+                <tr className="border-b border-border">
                   <th className="py-2 pr-3 font-medium">Participante</th>
                   <th className="py-2 pr-3 font-medium">Categoría</th>
                   <th className="py-2 pr-3 font-medium">Asistencia</th>
@@ -221,12 +221,12 @@ export default async function InstructorCoursePage({
               </thead>
               <tbody>
                 {roster.map((entry) => (
-                  <tr key={entry.enrollmentId} className="border-b border-line">
-                    <td className="py-3 pr-3 text-zinc-100">{entry.name}</td>
-                    <td className="py-3 pr-3 text-zinc-400">
+                  <tr key={entry.enrollmentId} className="border-b border-border">
+                    <td className="py-3 pr-3 text-foreground">{entry.name}</td>
+                    <td className="py-3 pr-3 text-muted-foreground">
                       {categoryLabel(entry.category)}
                     </td>
-                    <td className="py-3 pr-3 text-zinc-400">
+                    <td className="py-3 pr-3 text-muted-foreground">
                       {formatAttendance(entry.present, sessions.length)}
                     </td>
                     <td className="py-3">

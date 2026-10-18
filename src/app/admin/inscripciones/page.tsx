@@ -25,10 +25,10 @@ export default async function AdminEnrollmentsPage() {
 
   return (
     <AppShell role="admin" name={profile.full_name}>
-      <h1 className="text-xl font-semibold tracking-tight text-white">
+      <h1 className="text-xl font-semibold tracking-tight text-foreground">
         Inscripciones
       </h1>
-      <p className="mt-2 text-sm text-zinc-500">
+      <p className="mt-2 text-sm text-muted-foreground">
         La preinscripción queda pendiente hasta registrar el pago en caja o
         aplicar una beca.
       </p>
@@ -62,14 +62,14 @@ function EnrollmentTable({
 }) {
   return (
     <section className="mt-10">
-      <h2 className="text-sm font-medium text-zinc-300">{title}</h2>
+      <h2 className="text-sm font-medium text-foreground">{title}</h2>
       {rows.length === 0 ? (
-        <p className="mt-4 text-sm text-zinc-500">{empty}</p>
+        <p className="mt-4 text-sm text-muted-foreground">{empty}</p>
       ) : (
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[720px] text-left text-sm">
-            <thead className="text-zinc-500">
-              <tr className="border-b border-line">
+            <thead className="text-muted-foreground">
+              <tr className="border-b border-border">
                 <th className="py-2 pr-3 font-medium">Participante</th>
                 <th className="py-2 pr-3 font-medium">Curso</th>
                 <th className="py-2 pr-3 font-medium">Categoría</th>
@@ -84,27 +84,27 @@ function EnrollmentTable({
             </thead>
             <tbody>
               {rows.map((row) => (
-                <tr key={row.id} className="border-b border-line">
-                  <td className="py-3 pr-3 text-zinc-100">
+                <tr key={row.id} className="border-b border-border">
+                  <td className="py-3 pr-3 text-foreground">
                     {row.student?.full_name ?? "—"}
                   </td>
-                  <td className="py-3 pr-3 text-zinc-400">
+                  <td className="py-3 pr-3 text-muted-foreground">
                     {row.course?.name ?? "—"}
                   </td>
-                  <td className="py-3 pr-3 text-zinc-400">
+                  <td className="py-3 pr-3 text-muted-foreground">
                     {categoryLabel(row.category)}
                   </td>
-                  <td className="py-3 pr-3 text-zinc-400">
+                  <td className="py-3 pr-3 text-muted-foreground">
                     {formatBs(row.amount)}
                   </td>
-                  <td className="py-3 pr-3 text-zinc-400">
+                  <td className="py-3 pr-3 text-muted-foreground">
                     {enrollmentStatusLabel(row.status)}
                   </td>
                   <td className="py-3 text-right">
                     {showActions ? (
                       <ConfirmEnrollmentButtons id={row.id} />
                     ) : (
-                      <span className="text-zinc-400">
+                      <span className="text-muted-foreground">
                         {row.settlement === "beca" ? "Beca" : "Caja"}
                       </span>
                     )}

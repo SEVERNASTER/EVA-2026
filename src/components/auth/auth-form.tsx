@@ -33,9 +33,9 @@ export function AuthForm({ mode }: { mode: Mode }) {
     <form action={formAction} className="flex flex-col gap-4">
       {!isLogin ? (
         <label className="flex flex-col gap-2 text-sm">
-          <span className="text-zinc-400">Nombre</span>
+          <span className="text-muted-foreground">Nombre</span>
           <input
-            className="auth-field h-10 rounded-md border border-line bg-input px-3 text-sm text-foreground"
+            className="auth-field h-10 rounded-md border border-border bg-input px-3 text-sm text-foreground"
             name="full_name"
             autoComplete="name"
             required
@@ -44,9 +44,9 @@ export function AuthForm({ mode }: { mode: Mode }) {
       ) : null}
 
       <label className="flex flex-col gap-2 text-sm">
-        <span className="text-zinc-400">Correo</span>
+        <span className="text-muted-foreground">Correo</span>
         <input
-          className="auth-field h-10 rounded-md border border-line bg-input px-3 text-sm text-foreground"
+          className="auth-field h-10 rounded-md border border-border bg-input px-3 text-sm text-foreground"
           name="email"
           type="email"
           autoComplete="email"
@@ -55,9 +55,9 @@ export function AuthForm({ mode }: { mode: Mode }) {
       </label>
 
       <label className="flex flex-col gap-2 text-sm">
-        <span className="text-zinc-400">Contraseña</span>
+        <span className="text-muted-foreground">Contraseña</span>
         <input
-          className="auth-field h-10 rounded-md border border-line bg-input px-3 text-sm text-foreground"
+          className="auth-field h-10 rounded-md border border-border bg-input px-3 text-sm text-foreground"
           name="password"
           type="password"
           autoComplete={isLogin ? "current-password" : "new-password"}
@@ -67,31 +67,37 @@ export function AuthForm({ mode }: { mode: Mode }) {
       </label>
 
       {state?.error ? (
-        <p className="auth-error rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+        <p className="auth-error rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {state.error}
         </p>
       ) : null}
 
       <button
-        className="auth-submit mt-1 h-10 rounded-md bg-white text-sm font-medium text-black disabled:opacity-60"
+        className="auth-submit mt-1 h-10 rounded-md bg-primary text-sm font-medium text-primary-foreground disabled:opacity-60"
         type="submit"
         disabled={pending}
       >
         {pending ? "Entrando…" : isLogin ? "Continuar" : "Crear cuenta"}
       </button>
 
-      <p className="text-center text-sm text-zinc-500">
+      <p className="text-center text-sm text-muted-foreground">
         {isLogin ? (
           <>
             ¿No tienes cuenta?{" "}
-            <Link className="text-zinc-200 underline-offset-4 hover:underline" href="/registro">
+            <Link
+              className="text-foreground underline-offset-4 hover:underline"
+              href="/registro"
+            >
               Registrarse
             </Link>
           </>
         ) : (
           <>
             ¿Ya tienes cuenta?{" "}
-            <Link className="text-zinc-200 underline-offset-4 hover:underline" href="/login">
+            <Link
+              className="text-foreground underline-offset-4 hover:underline"
+              href="/login"
+            >
               Iniciar sesión
             </Link>
           </>

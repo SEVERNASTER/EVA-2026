@@ -30,10 +30,10 @@ export default async function EditCoursePage({
 
   return (
     <AppShell role="admin" name={profile.full_name}>
-      <Link className="text-sm text-zinc-500 hover:text-white" href="/admin">
+      <Link className="text-sm text-muted-foreground hover:text-foreground" href="/admin">
         Volver
       </Link>
-      <h1 className="mt-4 text-xl font-semibold tracking-tight text-white">
+      <h1 className="mt-4 text-xl font-semibold tracking-tight text-foreground">
         Editar curso
       </h1>
       <div className="mt-8">
