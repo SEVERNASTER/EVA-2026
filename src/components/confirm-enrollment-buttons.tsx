@@ -22,7 +22,7 @@ export function ConfirmEnrollmentButtons({ id }: { id: string }) {
     <div className="flex flex-col items-end gap-1">
       <div className="flex flex-wrap justify-end gap-3">
         <button
-          className="text-zinc-300 underline-offset-4 hover:underline disabled:opacity-50"
+          className="text-foreground underline-offset-4 hover:underline disabled:opacity-50"
           type="button"
           disabled={pending !== null}
           onClick={() => confirm("caja")}
@@ -30,7 +30,7 @@ export function ConfirmEnrollmentButtons({ id }: { id: string }) {
           {pending === "caja" ? "Registrando…" : "Registrar pago"}
         </button>
         <button
-          className="text-zinc-400 hover:text-white disabled:opacity-50"
+          className="text-muted-foreground hover:text-foreground disabled:opacity-50"
           type="button"
           disabled={pending !== null}
           onClick={() => confirm("beca")}
@@ -38,7 +38,7 @@ export function ConfirmEnrollmentButtons({ id }: { id: string }) {
           {pending === "beca" ? "Aplicando…" : "Aplicar beca"}
         </button>
       </div>
-      {error ? <p className="text-xs text-red-300">{error}</p> : null}
+      {error ? <p className="text-xs text-destructive">{error}</p> : null}
     </div>
   );
 }

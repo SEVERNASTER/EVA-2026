@@ -33,8 +33,8 @@ export function AppNav({ role }: { role: UserRole }) {
             href={item.href}
             className={
               active
-                ? "rounded-md bg-white/10 px-3 py-2 text-zinc-100"
-                : "rounded-md px-3 py-2 text-zinc-500 hover:text-zinc-200"
+                ? "rounded-md bg-sidebar-accent px-3 py-2 text-sidebar-accent-foreground"
+                : "rounded-md px-3 py-2 text-muted-foreground hover:text-foreground"
             }
           >
             {item.label}

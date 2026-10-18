@@ -11,15 +11,22 @@ import {
   type Enrollment,
   type ParticipantCategory,
 } from "@/lib/enrollments/types";
+import {
+  formatAttendance,
+  formatScore,
+  type CourseProgress,
+} from "@/lib/teaching/types";
 
 type State = { error: string } | { ok: true } | null;
 
 export function StudentCourseList({
   courses,
   enrollments,
+  progress = {},
 }: {
   courses: Course[];
   enrollments: Enrollment[];
+  progress?: Record<string, CourseProgress>;
 }) {
   const byCourse = useMemo(() => {
     return new Map(enrollments.map((row) => [row.course_id, row]));
@@ -27,21 +34,22 @@ export function StudentCourseList({
 
   return (
     <section>
-      <h1 className="text-xl font-semibold tracking-tight text-white">
+      <h1 className="text-xl font-semibold tracking-tight text-foreground">
         Oferta de cursos
       </h1>
       {courses.length === 0 ? (
-        <p className="mt-6 text-sm text-zinc-500">No hay cursos publicados.</p>
+        <p className="mt-6 text-sm text-muted-foreground">No hay cursos publicados.</p>
       ) : (
         <ul className="mt-8 grid gap-3">
           {courses.map((course) => (
             <li
               key={course.id}
-              className="rounded-lg border border-line bg-panel px-5 py-4"
+              className="rounded-lg border border-border bg-card px-5 py-4"
             >
               <StudentCourseCard
                 course={course}
                 enrollment={byCourse.get(course.id)}
+                progress={progress[course.id]}
               />
             </li>
           ))}
@@ -54,9 +62,11 @@ export function StudentCourseList({
 function StudentCourseCard({
   course,
   enrollment,
+  progress,
 }: {
   course: Course;
   enrollment?: Enrollment;
+  progress?: CourseProgress;
 }) {
   const [category, setCategory] = useState<ParticipantCategory>("regular");
   const price = amountForCategory(
@@ -74,35 +84,42 @@ function StudentCourseCard({
   return (
     <div>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-sm font-medium text-white">{course.name}</h2>
-        <p className="text-sm text-zinc-400">
+        <h2 className="text-sm font-medium text-foreground">{course.name}</h2>
+        <p className="text-sm text-muted-foreground">
           Regular {formatBs(course.precio_regular)}
           {course.precio_auxiliar > 0
             ? ` · Auxiliar ${formatBs(course.precio_auxiliar)}`
             : " · Auxiliar / beca Bs 0"}
         </p>
       </div>
-      <p className="mt-2 text-sm leading-6 text-zinc-500">{course.content}</p>
-      <p className="mt-3 text-xs text-zinc-500">
+      <p className="mt-2 text-sm leading-6 text-muted-foreground">{course.content}</p>
+      <p className="mt-3 text-xs text-muted-foreground">
         {course.hours} h · {course.schedule}
         {course.instructor?.full_name ? ` · ${course.instructor.full_name}` : ""}
       </p>
 
       {enrollment ? (
-        <p className="mt-4 text-sm text-zinc-300">
+        <p className="mt-4 text-sm text-foreground">
           {enrollmentStatusLabel(enrollment.status)}
           {" · "}
           {categoryLabel(enrollment.category)}
           {" · "}
           {formatBs(enrollment.amount)}
+          {progress ? (
+            <span className="mt-1 block text-muted-foreground">
+              Asistencia {formatAttendance(progress.present, progress.total)}
+              {" · "}
+              Nota {formatScore(progress.score)}
+            </span>
+          ) : null}
         </p>
       ) : (
         <form action={formAction} className="mt-4 flex flex-wrap items-end gap-3">
           <input type="hidden" name="course_id" value={course.id} />
-          <label className="flex min-w-48 flex-col gap-1 text-xs text-zinc-500">
+          <label className="flex min-w-48 flex-col gap-1 text-xs text-muted-foreground">
             Categoría
             <select
-              className="auth-field h-9 rounded-md border border-line bg-input px-2 text-sm text-foreground"
+              className="auth-field h-9 rounded-md border border-border bg-input px-2 text-sm text-foreground"
               name="category"
               value={category}
               onChange={(event) =>
@@ -116,9 +133,9 @@ function StudentCourseCard({
               ))}
             </select>
           </label>
-          <p className="pb-2 text-sm text-zinc-400">{formatBs(price)}</p>
+          <p className="pb-2 text-sm text-muted-foreground">{formatBs(price)}</p>
           <button
-            className="auth-submit h-9 rounded-md bg-white px-3 text-sm font-medium text-black disabled:opacity-60"
+            className="auth-submit h-9 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground disabled:opacity-60"
             type="submit"
             disabled={pending}
           >
@@ -128,7 +145,7 @@ function StudentCourseCard({
       )}
 
       {state && "error" in state ? (
-        <p className="auth-error mt-3 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+        <p className="auth-error mt-3 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {state.error}
         </p>
       ) : null}
