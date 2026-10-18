@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AppShell } from "@/components/app-shell";
 import { AttendanceForm } from "@/components/teaching/attendance-form";
 import { DeleteSessionButton } from "@/components/teaching/delete-session-button";
 import { GradeForm } from "@/components/teaching/grade-form";
@@ -106,8 +105,11 @@ export default async function InstructorCoursePage({
   const typedCourse = course as Course;
 
   return (
-    <AppShell role="instructor" name={profile.full_name}>
-      <Link className="text-sm text-muted-foreground hover:text-foreground" href="/instructor">
+    <>
+      <Link
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
+        href="/instructor"
+      >
         Volver
       </Link>
       <h1 className="mt-4 text-xl font-semibold tracking-tight text-foreground">
@@ -243,6 +245,6 @@ export default async function InstructorCoursePage({
           </div>
         )}
       </section>
-    </AppShell>
+    </>
   );
 }

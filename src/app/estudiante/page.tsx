@@ -1,4 +1,3 @@
-import { AppShell } from "@/components/app-shell";
 import { StudentCourseList } from "@/components/student-course-list";
 import { requireRole } from "@/lib/auth/guards";
 import type { Course } from "@/lib/courses/types";
@@ -17,7 +16,7 @@ export default async function StudentPage() {
   const [{ data: courses }, { data: enrollmentData }] = await Promise.all([
     supabase
       .from("courses")
-      .select("*, instructor:profiles!instructor_id(full_name)")
+      .select("*, instructor:profiles!instructor_id(full_name), course_schedule_slots(*)")
       .eq("published", true)
       .order("name"),
     supabase.from("enrollments").select("*").eq("student_id", profile.id),
@@ -64,12 +63,10 @@ export default async function StudentPage() {
   }
 
   return (
-    <AppShell role="estudiante" name={profile.full_name}>
-      <StudentCourseList
+    <StudentCourseList
         courses={(courses ?? []) as Course[]}
         enrollments={enrollments}
         progress={progress}
       />
-    </AppShell>
   );
 }

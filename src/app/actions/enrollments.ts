@@ -99,3 +99,44 @@ export async function confirmEnrollment(
   revalidateEnrollmentPaths();
   return { ok: true };
 }
+
+export async function rejectScholarship(id: string) {
+  await requireRole("admin");
+  const supabase = await createClient();
+  const { data: enrollment, error: loadError } = await supabase
+    .from("enrollments")
+    .select("id, status, category, course_id")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (loadError || !enrollment) {
+    return { error: "No se encontró la solicitud." };
+  }
+  if (enrollment.status !== "pendiente_pago" || enrollment.category !== "beca") {
+    return { error: "Esta fila no es una solicitud de beca pendiente." };
+  }
+
+  const { data: course } = await supabase
+    .from("courses")
+    .select("precio_regular")
+    .eq("id", enrollment.course_id)
+    .maybeSingle();
+
+  const { error } = await supabase
+    .from("enrollments")
+    .update({
+      category: "regular",
+      amount: Number(course?.precio_regular ?? 0),
+      confirmed_at: null,
+      confirmed_by: null,
+    })
+    .eq("id", id)
+    .eq("status", "pendiente_pago");
+
+  if (error) {
+    return { error: "No se pudo pasar la solicitud a pago regular." };
+  }
+
+  revalidateEnrollmentPaths();
+  return { ok: true };
+}

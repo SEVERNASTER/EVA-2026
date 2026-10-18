@@ -304,6 +304,102 @@ update public.courses
 set precio_auxiliar = round((precio_regular * 0.5)::numeric, 2)
 where published;
 
+insert into public.course_schedule_slots (course_id, weekday, starts_at, ends_at, sort_order)
+select id, weekday, starts_at::time, ends_at::time, sort_order
+from public.courses
+cross join lateral (
+  values
+    (1, '18:30', '21:00', 0),
+    (3, '18:30', '21:00', 1)
+) as slot(weekday, starts_at, ends_at, sort_order)
+where name = 'Node.js: APIs REST y autenticación';
+
+insert into public.course_schedule_slots (course_id, weekday, starts_at, ends_at, sort_order)
+select id, weekday, starts_at::time, ends_at::time, sort_order
+from public.courses
+cross join lateral (
+  values
+    (2, '19:00', '21:30', 0),
+    (4, '19:00', '21:30', 1)
+) as slot(weekday, starts_at, ends_at, sort_order)
+where name = 'React y TypeScript para interfaces web';
+
+insert into public.course_schedule_slots (course_id, weekday, starts_at, ends_at, sort_order)
+select id, 6, '08:00'::time, '12:00'::time, 0
+from public.courses
+where name = 'PostgreSQL aplicado a sistemas institucionales';
+
+insert into public.course_schedule_slots (course_id, weekday, starts_at, ends_at, sort_order)
+select id, 5, '18:00'::time, '22:00'::time, 0
+from public.courses
+where name = 'Git y colaboración en repositorios de equipo';
+
+insert into public.course_schedule_slots (course_id, weekday, starts_at, ends_at, sort_order)
+select id, weekday, starts_at::time, ends_at::time, sort_order
+from public.courses
+cross join lateral (
+  values
+    (1, '18:30', '21:30', 0),
+    (5, '18:30', '21:30', 1)
+) as slot(weekday, starts_at, ends_at, sort_order)
+where name = 'Docker y empaquetado de servicios';
+
+insert into public.course_schedule_slots (course_id, weekday, starts_at, ends_at, sort_order)
+select id, 3, '18:00'::time, '22:00'::time, 0
+from public.courses
+where name = 'Fundamentos de ciberseguridad para desarrolladores';
+
+insert into public.course_schedule_slots (course_id, weekday, starts_at, ends_at, sort_order)
+select id, weekday, starts_at::time, ends_at::time, sort_order
+from public.courses
+cross join lateral (
+  values
+    (2, '18:00', '20:30', 0),
+    (4, '18:00', '20:30', 1)
+) as slot(weekday, starts_at, ends_at, sort_order)
+where name = 'Python para análisis de datos académicos';
+
+insert into public.course_schedule_slots (course_id, weekday, starts_at, ends_at, sort_order)
+select id, 6, '14:00'::time, '18:00'::time, 0
+from public.courses
+where name = 'SQL avanzado y optimización de consultas';
+
+insert into public.course_schedule_slots (course_id, weekday, starts_at, ends_at, sort_order)
+select id, 4, '18:00'::time, '21:20'::time, 0
+from public.courses
+where name = 'Linux para laboratorios de computación';
+
+insert into public.course_schedule_slots (course_id, weekday, starts_at, ends_at, sort_order)
+select id, 1, '19:00'::time, '22:00'::time, 0
+from public.courses
+where name = 'Ingeniería de requisitos y modelado UML';
+
+insert into public.course_schedule_slots (course_id, weekday, starts_at, ends_at, sort_order)
+select id, weekday, starts_at::time, ends_at::time, sort_order
+from public.courses
+cross join lateral (
+  values
+    (2, '18:30', '21:00', 0),
+    (4, '18:30', '21:00', 1)
+) as slot(weekday, starts_at, ends_at, sort_order)
+where name = 'Next.js: renderizado en servidor y rutas de API';
+
+insert into public.course_schedule_slots (course_id, weekday, starts_at, ends_at, sort_order)
+select id, 6, '08:30'::time, '12:30'::time, 0
+from public.courses
+where name = 'Introducción a modelos de lenguaje con Python';
+
+-- Luciana: solicitud de beca pendiente (Ciberseguridad)
+insert into public.enrollments (course_id, student_id, category, amount, status)
+select
+  id,
+  '33333333-3333-3333-3333-333333333333',
+  'beca',
+  0,
+  'pendiente_pago'
+from public.courses
+where name = 'Fundamentos de ciberseguridad para desarrolladores';
+
 -- Luciana: preinscripción regular pendiente de pago (Node.js)
 insert into public.enrollments (course_id, student_id, category, amount, status)
 select

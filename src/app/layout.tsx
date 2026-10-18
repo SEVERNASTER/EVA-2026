@@ -13,17 +13,21 @@ export const metadata: Metadata = {
     "Plataforma de formación continua con certificación digital verificable",
 };
 
-const themeInit = `(function(){try{var t=localStorage.getItem("eva-theme");var d=t==="dark"||(t!=="light"&&window.matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.classList.toggle("dark",d);}catch(e){}})();`;
+const themeInit = `(function(){try{var t=localStorage.getItem("eva-theme");var d=t==="dark"||(t!=="light"&&window.matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.classList.toggle("dark",d);document.documentElement.style.colorScheme=d?"dark":"light";}catch(e){}})();`;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="es"
+      lang="es-BO"
       className={`${plusJakarta.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..600,0..1,0&display=swap"
+        />
       </head>
       <body className="flex min-h-full flex-col bg-background font-sans text-foreground">
         {children}

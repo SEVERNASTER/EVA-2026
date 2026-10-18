@@ -31,7 +31,7 @@ export function AttendanceForm({
       <ul className="grid gap-2">
         {entries.map((entry) => (
           <li key={entry.enrollmentId}>
-            <label className="flex items-center gap-3 rounded-md border border-border bg-card px-4 py-3 text-sm text-foreground">
+            <label className="flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground">
               <input
                 name={`present_${entry.enrollmentId}`}
                 type="checkbox"
@@ -44,7 +44,7 @@ export function AttendanceForm({
       </ul>
       <div className="flex flex-wrap items-center gap-3">
         <button
-          className="auth-submit h-9 w-fit rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground disabled:opacity-60"
+          className="auth-submit h-10 w-fit rounded-2xl bg-primary px-3 text-sm font-medium text-primary-foreground disabled:opacity-60"
           type="submit"
           disabled={pending}
         >
@@ -55,7 +55,7 @@ export function AttendanceForm({
         ) : null}
       </div>
       {state && "error" in state ? (
-        <p className="auth-error rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <p className="auth-error rounded-2xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {state.error}
         </p>
       ) : null}

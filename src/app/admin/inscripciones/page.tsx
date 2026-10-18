@@ -1,16 +1,18 @@
 import { ConfirmEnrollmentButtons } from "@/components/confirm-enrollment-buttons";
-import { AppShell } from "@/components/app-shell";
+import { Badge } from "@/components/ui/badge";
+import { Icon } from "@/components/ui/icon";
+import { Money } from "@/components/ui/money";
 import { requireRole } from "@/lib/auth/guards";
-import { formatBs } from "@/lib/courses/types";
 import {
   categoryLabel,
   enrollmentStatusLabel,
+  isScholarshipRequest,
   type Enrollment,
 } from "@/lib/enrollments/types";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function AdminEnrollmentsPage() {
-  const profile = await requireRole("admin");
+  await requireRole("admin");
   const supabase = await createClient();
   const { data } = await supabase
     .from("enrollments")
@@ -20,36 +22,98 @@ export default async function AdminEnrollmentsPage() {
     .order("created_at", { ascending: false });
 
   const rows = (data ?? []) as Enrollment[];
-  const pending = rows.filter((row) => row.status === "pendiente_pago");
+  const pendingPay = rows.filter(
+    (row) => row.status === "pendiente_pago" && row.category !== "beca",
+  );
+  const pendingAid = rows.filter(isScholarshipRequest);
   const confirmed = rows.filter((row) => row.status === "inscrito");
+  const pendingTotal = pendingPay.reduce((sum, row) => sum + Number(row.amount), 0);
+  const confirmedTotal = confirmed.reduce(
+    (sum, row) => sum + Number(row.amount),
+    0,
+  );
 
   return (
-    <AppShell role="admin" name={profile.full_name}>
+    <>
       <h1 className="text-xl font-semibold tracking-tight text-foreground">
         Inscripciones
       </h1>
       <p className="mt-2 text-sm text-muted-foreground">
-        La preinscripción queda pendiente hasta registrar el pago en caja o
-        aplicar una beca.
+        Caja registra el pago o confirma una solicitud de beca. El estudiante no
+        queda inscrito hasta esa revisión.
       </p>
 
-      <EnrollmentTable
+      <div className="mt-6 grid gap-3 sm:grid-cols-2">
+        <SummaryCard
+          icon="payments"
+          label="Pendiente de cobro"
+          value={pendingTotal}
+          hint={
+            pendingPay.length === 1
+              ? "1 preinscripción"
+              : `${pendingPay.length} preinscripciones`
+          }
+        />
+        <SummaryCard
+          icon="account_balance_wallet"
+          label="Inscrito / liquidado"
+          value={confirmedTotal}
+          hint={
+            confirmed.length === 1
+              ? "1 participante"
+              : `${confirmed.length} participantes`
+          }
+        />
+      </div>
+
+      <EnrollmentList
         title="Pendientes de pago"
-        empty="No hay preinscripciones pendientes."
-        rows={pending}
+        empty="No hay preinscripciones pendientes de cobro."
+        rows={pendingPay}
         showActions
       />
-      <EnrollmentTable
+      <EnrollmentList
+        title="Solicitudes de beca"
+        empty="No hay solicitudes de beca por revisar."
+        rows={pendingAid}
+        showActions
+      />
+      <EnrollmentList
         title="Inscritos"
         empty="Aún no hay participantes inscritos."
         rows={confirmed}
         showActions={false}
       />
-    </AppShell>
+    </>
   );
 }
 
-function EnrollmentTable({
+function SummaryCard({
+  icon,
+  label,
+  value,
+  hint,
+}: {
+  icon: string;
+  label: string;
+  value: number;
+  hint: string;
+}) {
+  return (
+    <div className="rounded-[1.4rem] border border-border bg-card p-5 shadow-sm">
+      <p className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Icon name={icon} size={18} />
+        {label}
+      </p>
+      <p className="mt-3 text-2xl font-semibold tracking-tight">
+        <Money value={value} />
+      </p>
+      <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
+    </div>
+  );
+}
+
+function EnrollmentList({
   title,
   empty,
   rows,
@@ -61,59 +125,71 @@ function EnrollmentTable({
   showActions: boolean;
 }) {
   return (
-    <section className="mt-10">
-      <h2 className="text-sm font-medium text-foreground">{title}</h2>
+    <section className="mt-8">
+      <h2 className="mb-3 text-sm font-medium text-foreground">{title}</h2>
       {rows.length === 0 ? (
-        <p className="mt-4 text-sm text-muted-foreground">{empty}</p>
+        <p className="rounded-[1.4rem] border border-dashed border-border px-5 py-8 text-sm text-muted-foreground">
+          {empty}
+        </p>
       ) : (
-        <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[720px] text-left text-sm">
-            <thead className="text-muted-foreground">
-              <tr className="border-b border-border">
-                <th className="py-2 pr-3 font-medium">Participante</th>
-                <th className="py-2 pr-3 font-medium">Curso</th>
-                <th className="py-2 pr-3 font-medium">Categoría</th>
-                <th className="py-2 pr-3 font-medium">Importe</th>
-                <th className="py-2 pr-3 font-medium">Estado</th>
-                {showActions ? (
-                  <th className="py-2 font-medium"> </th>
-                ) : (
-                  <th className="py-2 font-medium">Liquidación</th>
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => (
-                <tr key={row.id} className="border-b border-border">
-                  <td className="py-3 pr-3 text-foreground">
-                    {row.student?.full_name ?? "—"}
-                  </td>
-                  <td className="py-3 pr-3 text-muted-foreground">
-                    {row.course?.name ?? "—"}
-                  </td>
-                  <td className="py-3 pr-3 text-muted-foreground">
-                    {categoryLabel(row.category)}
-                  </td>
-                  <td className="py-3 pr-3 text-muted-foreground">
-                    {formatBs(row.amount)}
-                  </td>
-                  <td className="py-3 pr-3 text-muted-foreground">
-                    {enrollmentStatusLabel(row.status)}
-                  </td>
-                  <td className="py-3 text-right">
-                    {showActions ? (
-                      <ConfirmEnrollmentButtons id={row.id} />
-                    ) : (
-                      <span className="text-muted-foreground">
-                        {row.settlement === "beca" ? "Beca" : "Caja"}
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <ul className="grid gap-3">
+          {rows.map((row) => {
+            const scholarship = isScholarshipRequest(row);
+            return (
+              <li
+                key={row.id}
+                className="rounded-[1.4rem] border border-border bg-card p-4 shadow-sm"
+              >
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                  <div className="min-w-0">
+                    <p className="font-medium text-foreground">
+                      {row.student?.full_name ?? "—"}
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {row.course?.name ?? "—"} · {categoryLabel(row.category)}
+                    </p>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      {scholarship ? (
+                        <span className="text-sm text-muted-foreground">Sin cobro si se confirma</span>
+                      ) : (
+                        <Money value={row.amount} />
+                      )}
+                      <Badge
+                        tone={
+                          row.status === "inscrito"
+                            ? "success"
+                            : scholarship
+                              ? "warning"
+                              : "warning"
+                        }
+                      >
+                        {enrollmentStatusLabel(row.status, row.category)}
+                      </Badge>
+                      {!showActions ? (
+                        <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+                          <Icon
+                            name={row.settlement === "beca" ? "workspace_premium" : "point_of_sale"}
+                            size={16}
+                          />
+                          {row.settlement === "beca" ? "Beca" : "Caja"}
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+                  {showActions ? (
+                    <ConfirmEnrollmentButtons
+                      id={row.id}
+                      studentName={row.student?.full_name ?? "Participante"}
+                      courseName={row.course?.name ?? "el curso"}
+                      amount={row.amount}
+                      scholarshipRequest={scholarship}
+                    />
+                  ) : null}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
       )}
     </section>
   );

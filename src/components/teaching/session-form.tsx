@@ -6,7 +6,7 @@ import { createSession } from "@/app/actions/teaching";
 type State = { error: string } | { ok: true } | null;
 
 const fieldClass =
-  "auth-field h-9 rounded-md border border-border bg-input px-3 text-sm text-foreground";
+  "auth-field h-10 rounded-2xl border border-border bg-background px-3 text-sm text-foreground";
 
 export function SessionForm({ courseId }: { courseId: string }) {
   async function action(_prev: State, formData: FormData): Promise<State> {
@@ -32,7 +32,7 @@ export function SessionForm({ courseId }: { courseId: string }) {
           />
         </label>
         <button
-          className="auth-submit h-9 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground disabled:opacity-60"
+          className="auth-submit h-10 rounded-2xl bg-primary px-3 text-sm font-medium text-primary-foreground disabled:opacity-60"
           type="submit"
           disabled={pending}
         >
@@ -40,7 +40,7 @@ export function SessionForm({ courseId }: { courseId: string }) {
         </button>
       </div>
       {state && "error" in state ? (
-        <p className="auth-error rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <p className="auth-error rounded-2xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {state.error}
         </p>
       ) : null}

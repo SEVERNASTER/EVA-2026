@@ -1,5 +1,8 @@
 import Link from "next/link";
-import { formatBs, type Course } from "@/lib/courses/types";
+import { Icon } from "@/components/ui/icon";
+import { Money } from "@/components/ui/money";
+import { formatSlot } from "@/lib/courses/schedule";
+import { courseScheduleLabel, type Course } from "@/lib/courses/types";
 
 export function CourseCatalog({
   title,
@@ -22,26 +25,47 @@ export function CourseCatalog({
           {courses.map((course) => (
             <li
               key={course.id}
-              className="rounded-lg border border-border bg-card px-5 py-4"
+              className="rounded-[1.4rem] border border-border bg-card px-5 py-4 shadow-sm"
             >
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h2 className="text-sm font-medium text-foreground">{course.name}</h2>
-                <p className="text-sm text-muted-foreground">{formatBs(course.precio_regular)}</p>
+              <div className="flex items-start justify-between gap-4">
+                <h2 className="text-base font-semibold tracking-tight text-foreground">
+                  {course.name}
+                </h2>
+                <Money className="text-base" value={course.precio_regular} />
               </div>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">{course.content}</p>
-              <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-                <p className="text-xs text-muted-foreground">
-                  {course.hours} h · {course.schedule}
-                  {course.instructor?.full_name
-                    ? ` · ${course.instructor.full_name}`
-                    : ""}
+              <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">
+                {course.content}
+              </p>
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                <p className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                  <span className="rounded-full bg-muted px-2.5 py-1">{course.hours} h</span>
+                  {(course.course_schedule_slots ?? []).length > 0
+                    ? course.course_schedule_slots!.map((slot) => (
+                        <span
+                          key={`${slot.weekday}-${slot.starts_at}`}
+                          className="rounded-full bg-muted px-2.5 py-1"
+                        >
+                          {formatSlot(slot)}
+                        </span>
+                      ))
+                    : (
+                        <span className="rounded-full bg-muted px-2.5 py-1">
+                          {courseScheduleLabel(course)}
+                        </span>
+                      )}
+                  {course.instructor?.full_name ? (
+                    <span className="rounded-full bg-muted px-2.5 py-1">
+                      {course.instructor.full_name}
+                    </span>
+                  ) : null}
                 </p>
                 {manageHref ? (
                   <Link
-                    className="text-sm text-foreground underline-offset-4 hover:underline"
+                    className="inline-flex h-9 shrink-0 items-center gap-1 rounded-2xl border border-border px-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
                     href={`${manageHref}/${course.id}`}
                   >
-                    Gestionar curso →
+                    Gestionar
+                    <Icon name="arrow_forward" size={16} />
                   </Link>
                 ) : null}
               </div>
