@@ -1,5 +1,4 @@
 import { ConfirmEnrollmentButtons } from "@/components/confirm-enrollment-buttons";
-import { AppShell } from "@/components/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Icon } from "@/components/ui/icon";
 import { Money } from "@/components/ui/money";
@@ -7,12 +6,13 @@ import { requireRole } from "@/lib/auth/guards";
 import {
   categoryLabel,
   enrollmentStatusLabel,
+  isScholarshipRequest,
   type Enrollment,
 } from "@/lib/enrollments/types";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function AdminEnrollmentsPage() {
-  const profile = await requireRole("admin");
+  await requireRole("admin");
   const supabase = await createClient();
   const { data } = await supabase
     .from("enrollments")
@@ -22,22 +22,25 @@ export default async function AdminEnrollmentsPage() {
     .order("created_at", { ascending: false });
 
   const rows = (data ?? []) as Enrollment[];
-  const pending = rows.filter((row) => row.status === "pendiente_pago");
+  const pendingPay = rows.filter(
+    (row) => row.status === "pendiente_pago" && row.category !== "beca",
+  );
+  const pendingAid = rows.filter(isScholarshipRequest);
   const confirmed = rows.filter((row) => row.status === "inscrito");
-  const pendingTotal = pending.reduce((sum, row) => sum + Number(row.amount), 0);
+  const pendingTotal = pendingPay.reduce((sum, row) => sum + Number(row.amount), 0);
   const confirmedTotal = confirmed.reduce(
     (sum, row) => sum + Number(row.amount),
     0,
   );
 
   return (
-    <AppShell role="admin" name={profile.full_name}>
+    <>
       <h1 className="text-xl font-semibold tracking-tight text-foreground">
         Inscripciones
       </h1>
       <p className="mt-2 text-sm text-muted-foreground">
-        La preinscripción queda pendiente hasta registrar el pago en caja o
-        aplicar una beca.
+        Caja registra el pago o confirma una solicitud de beca. El estudiante no
+        queda inscrito hasta esa revisión.
       </p>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -46,9 +49,9 @@ export default async function AdminEnrollmentsPage() {
           label="Pendiente de cobro"
           value={pendingTotal}
           hint={
-            pending.length === 1
+            pendingPay.length === 1
               ? "1 preinscripción"
-              : `${pending.length} preinscripciones`
+              : `${pendingPay.length} preinscripciones`
           }
         />
         <SummaryCard
@@ -63,19 +66,25 @@ export default async function AdminEnrollmentsPage() {
         />
       </div>
 
-      <EnrollmentTable
+      <EnrollmentList
         title="Pendientes de pago"
-        empty="No hay preinscripciones pendientes."
-        rows={pending}
+        empty="No hay preinscripciones pendientes de cobro."
+        rows={pendingPay}
         showActions
       />
-      <EnrollmentTable
+      <EnrollmentList
+        title="Solicitudes de beca"
+        empty="No hay solicitudes de beca por revisar."
+        rows={pendingAid}
+        showActions
+      />
+      <EnrollmentList
         title="Inscritos"
         empty="Aún no hay participantes inscritos."
         rows={confirmed}
         showActions={false}
       />
-    </AppShell>
+    </>
   );
 }
 
@@ -104,7 +113,7 @@ function SummaryCard({
   );
 }
 
-function EnrollmentTable({
+function EnrollmentList({
   title,
   empty,
   rows,
@@ -123,63 +132,64 @@ function EnrollmentTable({
           {empty}
         </p>
       ) : (
-        <div className="overflow-hidden rounded-[1.4rem] border border-border bg-card shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] text-left text-sm">
-              <thead className="bg-muted/70 text-muted-foreground">
-                <tr>
-                  <th className="px-5 py-3 font-medium">Participante</th>
-                  <th className="px-3 py-3 font-medium">Curso</th>
-                  <th className="px-3 py-3 font-medium">Categoría</th>
-                  <th className="px-3 py-3 font-medium">Importe</th>
-                  <th className="px-3 py-3 font-medium">Estado</th>
-                  <th className="px-5 py-3 font-medium">
-                    {showActions ? " " : "Liquidación"}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row) => (
-                  <tr
-                    key={row.id}
-                    className="border-t border-border hover:bg-muted/40"
-                  >
-                    <td className="px-5 py-3.5 font-medium text-foreground">
+        <ul className="grid gap-3">
+          {rows.map((row) => {
+            const scholarship = isScholarshipRequest(row);
+            return (
+              <li
+                key={row.id}
+                className="rounded-[1.4rem] border border-border bg-card p-4 shadow-sm"
+              >
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                  <div className="min-w-0">
+                    <p className="font-medium text-foreground">
                       {row.student?.full_name ?? "—"}
-                    </td>
-                    <td className="px-3 py-3.5 text-muted-foreground">
-                      {row.course?.name ?? "—"}
-                    </td>
-                    <td className="px-3 py-3.5 text-muted-foreground">
-                      {categoryLabel(row.category)}
-                    </td>
-                    <td className="px-3 py-3.5">
-                      <Money value={row.amount} />
-                    </td>
-                    <td className="px-3 py-3.5">
-                      <Badge tone={row.status === "inscrito" ? "success" : "warning"}>
-                        {enrollmentStatusLabel(row.status)}
-                      </Badge>
-                    </td>
-                    <td className="px-5 py-3.5 text-right">
-                      {showActions ? (
-                        <ConfirmEnrollmentButtons id={row.id} />
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {row.course?.name ?? "—"} · {categoryLabel(row.category)}
+                    </p>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      {scholarship ? (
+                        <span className="text-sm text-muted-foreground">Sin cobro si se confirma</span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-muted-foreground">
+                        <Money value={row.amount} />
+                      )}
+                      <Badge
+                        tone={
+                          row.status === "inscrito"
+                            ? "success"
+                            : scholarship
+                              ? "warning"
+                              : "warning"
+                        }
+                      >
+                        {enrollmentStatusLabel(row.status, row.category)}
+                      </Badge>
+                      {!showActions ? (
+                        <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
                           <Icon
                             name={row.settlement === "beca" ? "workspace_premium" : "point_of_sale"}
                             size={16}
                           />
                           {row.settlement === "beca" ? "Beca" : "Caja"}
                         </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                  {showActions ? (
+                    <ConfirmEnrollmentButtons
+                      id={row.id}
+                      studentName={row.student?.full_name ?? "Participante"}
+                      courseName={row.course?.name ?? "el curso"}
+                      amount={row.amount}
+                      scholarshipRequest={scholarship}
+                    />
+                  ) : null}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
       )}
     </section>
   );
