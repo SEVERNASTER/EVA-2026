@@ -299,3 +299,121 @@ values
     80,
     390
   );
+
+update public.courses
+set precio_auxiliar = round((precio_regular * 0.5)::numeric, 2)
+where published;
+
+-- Luciana: preinscripción regular pendiente de pago (Node.js)
+insert into public.enrollments (course_id, student_id, category, amount, status)
+select
+  id,
+  '33333333-3333-3333-3333-333333333333',
+  'regular',
+  precio_regular,
+  'pendiente_pago'
+from public.courses
+where name = 'Node.js: APIs REST y autenticación';
+
+-- Rodrigo: inscrito como auxiliar ad-honorem con pago en caja (Node.js)
+insert into public.enrollments (
+  course_id,
+  student_id,
+  category,
+  amount,
+  status,
+  settlement,
+  confirmed_at,
+  confirmed_by
+)
+select
+  id,
+  '44444444-4444-4444-4444-444444444444',
+  'auxiliar_ad_honorem',
+  precio_auxiliar,
+  'inscrito',
+  'caja',
+  now(),
+  '11111111-1111-1111-1111-111111111111'
+from public.courses
+where name = 'Node.js: APIs REST y autenticación';
+
+-- Luciana: inscrita con pago en caja (Git)
+insert into public.enrollments (
+  course_id,
+  student_id,
+  category,
+  amount,
+  status,
+  settlement,
+  confirmed_at,
+  confirmed_by
+)
+select
+  id,
+  '33333333-3333-3333-3333-333333333333',
+  'regular',
+  precio_regular,
+  'inscrito',
+  'caja',
+  now(),
+  '11111111-1111-1111-1111-111111111111'
+from public.courses
+where name = 'Git y colaboración en repositorios de equipo';
+
+-- Sesiones (Node.js: 4, Git: 3)
+insert into public.sessions (course_id, session_date, topic)
+select c.id, s.session_date, s.topic
+from public.courses c
+cross join (
+  values
+    ('2026-09-28'::date, 'Introducción a Node.js y npm'),
+    ('2026-09-30'::date, 'Express: rutas y middlewares'),
+    ('2026-10-05'::date, 'Persistencia y validación'),
+    ('2026-10-07'::date, 'Autenticación con JWT')
+) as s (session_date, topic)
+where c.name = 'Node.js: APIs REST y autenticación';
+
+insert into public.sessions (course_id, session_date, topic)
+select c.id, s.session_date, s.topic
+from public.courses c
+cross join (
+  values
+    ('2026-09-29'::date, 'Commits, ramas y merge'),
+    ('2026-10-01'::date, 'Pull requests y revisión'),
+    ('2026-10-06'::date, 'Resolución de conflictos')
+) as s (session_date, topic)
+where c.name = 'Git y colaboración en repositorios de equipo';
+
+-- Rodrigo: 4/4 en Node.js
+insert into public.attendance (session_id, enrollment_id, present)
+select s.id, e.id, true
+from public.sessions s
+join public.courses c on c.id = s.course_id
+join public.enrollments e on e.course_id = c.id
+where c.name = 'Node.js: APIs REST y autenticación'
+  and e.student_id = '44444444-4444-4444-4444-444444444444';
+
+-- Luciana: 1/3 en Git
+insert into public.attendance (session_id, enrollment_id, present)
+select s.id, e.id, s.session_date = '2026-09-29'
+from public.sessions s
+join public.courses c on c.id = s.course_id
+join public.enrollments e on e.course_id = c.id
+where c.name = 'Git y colaboración en repositorios de equipo'
+  and e.student_id = '33333333-3333-3333-3333-333333333333';
+
+-- Notas: Rodrigo 85 (Node.js), Luciana 60 (Git)
+insert into public.grades (enrollment_id, score, graded_by)
+select e.id, 85, '22222222-2222-2222-2222-222222222222'
+from public.enrollments e
+join public.courses c on c.id = e.course_id
+where c.name = 'Node.js: APIs REST y autenticación'
+  and e.student_id = '44444444-4444-4444-4444-444444444444';
+
+insert into public.grades (enrollment_id, score, graded_by)
+select e.id, 60, '22222222-2222-2222-2222-222222222222'
+from public.enrollments e
+join public.courses c on c.id = e.course_id
+where c.name = 'Git y colaboración en repositorios de equipo'
+  and e.student_id = '33333333-3333-3333-3333-333333333333';

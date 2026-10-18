@@ -1,37 +1,50 @@
+import Link from "next/link";
 import { formatBs, type Course } from "@/lib/courses/types";
 
 export function CourseCatalog({
   title,
   empty,
   courses,
+  manageHref,
 }: {
   title: string;
   empty: string;
   courses: Course[];
+  manageHref?: string;
 }) {
   return (
     <section>
-      <h1 className="text-xl font-semibold tracking-tight text-white">{title}</h1>
+      <h1 className="text-xl font-semibold tracking-tight text-foreground">{title}</h1>
       {courses.length === 0 ? (
-        <p className="mt-6 text-sm text-zinc-500">{empty}</p>
+        <p className="mt-6 text-sm text-muted-foreground">{empty}</p>
       ) : (
         <ul className="mt-8 grid gap-3">
           {courses.map((course) => (
             <li
               key={course.id}
-              className="rounded-lg border border-line bg-panel px-5 py-4"
+              className="rounded-lg border border-border bg-card px-5 py-4"
             >
               <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h2 className="text-sm font-medium text-white">{course.name}</h2>
-                <p className="text-sm text-zinc-400">{formatBs(course.precio_regular)}</p>
+                <h2 className="text-sm font-medium text-foreground">{course.name}</h2>
+                <p className="text-sm text-muted-foreground">{formatBs(course.precio_regular)}</p>
               </div>
-              <p className="mt-2 text-sm leading-6 text-zinc-500">{course.content}</p>
-              <p className="mt-3 text-xs text-zinc-500">
-                {course.hours} h · {course.schedule}
-                {course.instructor?.full_name
-                  ? ` · ${course.instructor.full_name}`
-                  : ""}
-              </p>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">{course.content}</p>
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xs text-muted-foreground">
+                  {course.hours} h · {course.schedule}
+                  {course.instructor?.full_name
+                    ? ` · ${course.instructor.full_name}`
+                    : ""}
+                </p>
+                {manageHref ? (
+                  <Link
+                    className="text-sm text-foreground underline-offset-4 hover:underline"
+                    href={`${manageHref}/${course.id}`}
+                  >
+                    Gestionar curso →
+                  </Link>
+                ) : null}
+              </div>
             </li>
           ))}
         </ul>

@@ -16,12 +16,12 @@ export default async function NewCoursePage() {
   return (
     <AppShell role="admin" name={profile.full_name}>
       <Link
-        className="text-sm text-zinc-500 hover:text-white"
+        className="text-sm text-muted-foreground hover:text-foreground"
         href="/admin"
       >
         Volver
       </Link>
-      <h1 className="mt-4 text-xl font-semibold tracking-tight text-white">
+      <h1 className="mt-4 text-xl font-semibold tracking-tight text-foreground">
         Nuevo curso
       </h1>
       <div className="mt-8">

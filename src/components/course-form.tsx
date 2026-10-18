@@ -8,7 +8,7 @@ type InstructorOption = { id: string; full_name: string };
 type State = { error: string } | null;
 
 const fieldClass =
-  "auth-field h-10 w-full rounded-md border border-line bg-input px-3 text-sm text-foreground";
+  "auth-field h-10 w-full rounded-md border border-border bg-input px-3 text-sm text-foreground";
 
 export function CourseForm({
   course,
@@ -29,7 +29,7 @@ export function CourseForm({
   return (
     <form action={formAction} className="flex max-w-2xl flex-col gap-4">
       <label className="flex flex-col gap-2 text-sm">
-        <span className="text-zinc-400">Nombre</span>
+        <span className="text-muted-foreground">Nombre</span>
         <input
           className={fieldClass}
           name="name"
@@ -39,29 +39,30 @@ export function CourseForm({
       </label>
 
       <label className="flex flex-col gap-2 text-sm">
-        <span className="text-zinc-400">Contenido</span>
+        <span className="text-muted-foreground">Contenido</span>
         <textarea
-          className="auth-field min-h-28 w-full rounded-md border border-line bg-input px-3 py-2 text-sm text-foreground"
+          className="auth-field min-h-28 w-full rounded-md border border-border bg-input px-3 py-2 text-sm text-foreground"
           name="content"
           required
           defaultValue={course?.content}
         />
       </label>
 
+      <label className="flex flex-col gap-2 text-sm">
+        <span className="text-muted-foreground">Horas</span>
+        <input
+          className={fieldClass}
+          name="hours"
+          type="number"
+          min={1}
+          required
+          defaultValue={course?.hours ?? 40}
+        />
+      </label>
+
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-2 text-sm">
-          <span className="text-zinc-400">Horas</span>
-          <input
-            className={fieldClass}
-            name="hours"
-            type="number"
-            min={1}
-            required
-            defaultValue={course?.hours ?? 40}
-          />
-        </label>
-        <label className="flex flex-col gap-2 text-sm">
-          <span className="text-zinc-400">Precio regular (Bs)</span>
+          <span className="text-muted-foreground">Precio regular (Bs)</span>
           <input
             className={fieldClass}
             name="precio_regular"
@@ -72,10 +73,22 @@ export function CourseForm({
             defaultValue={course?.precio_regular ?? 0}
           />
         </label>
+        <label className="flex flex-col gap-2 text-sm">
+          <span className="text-muted-foreground">Precio auxiliar ad-honorem (Bs)</span>
+          <input
+            className={fieldClass}
+            name="precio_auxiliar"
+            type="number"
+            min={0}
+            step="0.01"
+            required
+            defaultValue={course?.precio_auxiliar ?? 0}
+          />
+        </label>
       </div>
 
       <label className="flex flex-col gap-2 text-sm">
-        <span className="text-zinc-400">Horario</span>
+        <span className="text-muted-foreground">Horario</span>
         <input
           className={fieldClass}
           name="schedule"
@@ -85,7 +98,7 @@ export function CourseForm({
       </label>
 
       <label className="flex flex-col gap-2 text-sm">
-        <span className="text-zinc-400">Instructor</span>
+        <span className="text-muted-foreground">Instructor</span>
         <select
           className={fieldClass}
           name="instructor_id"
@@ -103,7 +116,7 @@ export function CourseForm({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-2 text-sm">
-          <span className="text-zinc-400">Nota mínima</span>
+          <span className="text-muted-foreground">Nota mínima</span>
           <input
             className={fieldClass}
             name="nota_minima"
@@ -116,7 +129,7 @@ export function CourseForm({
           />
         </label>
         <label className="flex flex-col gap-2 text-sm">
-          <span className="text-zinc-400">Asistencia mínima (%)</span>
+          <span className="text-muted-foreground">Asistencia mínima (%)</span>
           <input
             className={fieldClass}
             name="asistencia_minima"
@@ -130,7 +143,7 @@ export function CourseForm({
         </label>
       </div>
 
-      <label className="flex items-center gap-2 text-sm text-zinc-300">
+      <label className="flex items-center gap-2 text-sm text-foreground">
         <input
           name="published"
           type="checkbox"
@@ -140,13 +153,13 @@ export function CourseForm({
       </label>
 
       {state?.error ? (
-        <p className="auth-error rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+        <p className="auth-error rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {state.error}
         </p>
       ) : null}
 
       <button
-        className="auth-submit mt-1 h-10 w-fit rounded-md bg-white px-4 text-sm font-medium text-black disabled:opacity-60"
+        className="auth-submit mt-1 h-10 w-fit rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-60"
         type="submit"
         disabled={pending}
       >

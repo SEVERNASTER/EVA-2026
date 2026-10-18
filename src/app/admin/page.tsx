@@ -18,21 +18,29 @@ export default async function AdminPage() {
   return (
     <AppShell role="admin" name={profile.full_name}>
       <div className="flex items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold tracking-tight text-white">
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">
           Cursos
         </h1>
-        <Link
-          className="auth-submit inline-flex h-9 items-center rounded-md bg-white px-3 text-sm font-medium text-black"
-          href="/admin/cursos/nuevo"
-        >
-          Nuevo curso
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            className="text-sm text-muted-foreground hover:text-foreground"
+            href="/admin/inscripciones"
+          >
+            Inscripciones
+          </Link>
+          <Link
+            className="auth-submit inline-flex h-9 items-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground"
+            href="/admin/cursos/nuevo"
+          >
+            Nuevo curso
+          </Link>
+        </div>
       </div>
 
       <div className="mt-8 overflow-x-auto">
         <table className="w-full min-w-[640px] text-left text-sm">
-          <thead className="text-zinc-500">
-            <tr className="border-b border-line">
+          <thead className="text-muted-foreground">
+            <tr className="border-b border-border">
               <th className="py-2 pr-3 font-medium">Nombre</th>
               <th className="py-2 pr-3 font-medium">Horas</th>
               <th className="py-2 pr-3 font-medium">Precio</th>
@@ -42,19 +50,19 @@ export default async function AdminPage() {
           </thead>
           <tbody>
             {courses.map((course) => (
-              <tr key={course.id} className="border-b border-line">
-                <td className="py-3 pr-3 text-zinc-100">{course.name}</td>
-                <td className="py-3 pr-3 text-zinc-400">{course.hours}</td>
-                <td className="py-3 pr-3 text-zinc-400">
+              <tr key={course.id} className="border-b border-border">
+                <td className="py-3 pr-3 text-foreground">{course.name}</td>
+                <td className="py-3 pr-3 text-muted-foreground">{course.hours}</td>
+                <td className="py-3 pr-3 text-muted-foreground">
                   {formatBs(course.precio_regular)}
                 </td>
-                <td className="py-3 pr-3 text-zinc-400">
+                <td className="py-3 pr-3 text-muted-foreground">
                   {course.published ? "Publicado" : "Borrador"}
                 </td>
                 <td className="py-3 text-right">
                   <div className="flex justify-end gap-3">
                     <Link
-                      className="text-zinc-300 underline-offset-4 hover:underline"
+                      className="text-foreground underline-offset-4 hover:underline"
                       href={`/admin/cursos/${course.id}`}
                     >
                       Editar
@@ -67,7 +75,7 @@ export default async function AdminPage() {
                       )}
                     >
                       <button
-                        className="text-zinc-400 hover:text-white"
+                        className="text-muted-foreground hover:text-foreground"
                         type="submit"
                       >
                         {course.published ? "Despublicar" : "Publicar"}

@@ -9,6 +9,7 @@ export type Course = {
   nota_minima: number;
   asistencia_minima: number;
   precio_regular: number;
+  precio_auxiliar: number;
   created_at: string;
   instructor?: { full_name: string } | null;
 };
