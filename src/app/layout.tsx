@@ -13,12 +13,12 @@ export const metadata: Metadata = {
     "Plataforma de formación continua con certificación digital verificable",
 };
 
-const themeInit = `(function(){try{var t=localStorage.getItem("eva-theme");var d=t==="dark"||(t!=="light"&&window.matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.classList.toggle("dark",d);}catch(e){}})();`;
+const themeInit = `(function(){try{var t=localStorage.getItem("eva-theme");var d=t==="dark"||(t!=="light"&&window.matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.classList.toggle("dark",d);document.documentElement.style.colorScheme=d?"dark":"light";}catch(e){}})();`;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="es"
+      lang="es-BO"
       className={`${plusJakarta.variable} h-full antialiased`}
       suppressHydrationWarning
     >

@@ -9,8 +9,8 @@ export function Badge({
 }) {
   const tones = {
     muted: "bg-muted text-muted-foreground",
-    success: "bg-primary/20 text-accent-foreground dark:text-primary",
-    warning: "bg-chart-5/25 text-foreground",
+    success: "bg-success text-success-foreground",
+    warning: "bg-warning text-warning-foreground",
   };
 
   return (

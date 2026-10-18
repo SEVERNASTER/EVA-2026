@@ -21,7 +21,12 @@
   --destructive-foreground: #ffffff;
   --border: #d7e0db;
   --input: #e8eeea;
-  --money: #0d9f5d;
+  --money: #086b3e;
+  --success: #d8f3e6;
+  --success-foreground: #086b3e;
+  --warning: #ffe8a3;
+  --warning-foreground: #6b4100;
+  --primary-hover: #3ad994;
   --ring: #51f0a8;
   --chart-1: #51f0a8;
   --chart-2: #7efe8f;
@@ -32,7 +37,7 @@
   --sidebar-foreground: #000000;
   --sidebar-primary: #000000;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #e4fef3;
+  --sidebar-accent: #eef1f0;
   --sidebar-accent-foreground: #000000;
   --sidebar-border: #ebebeb;
   --sidebar-ring: #000000;
@@ -58,7 +63,12 @@
   --destructive-foreground: #ffffff;
   --border: #2c3330;
   --input: #3b3b3b;
-  --money: #51f0a8;
+  --money: #8fbfa8;
+  --success: #143226;
+  --success-foreground: #c6ead6;
+  --warning: #4a3410;
+  --warning-foreground: #ffe3a1;
+  --primary-hover: #3ad994;
   --ring: #51f0a8;
   --chart-1: #51f0a8;
   --chart-2: #9effa1;
@@ -69,8 +79,8 @@
   --sidebar-foreground: #f0f0f0;
   --sidebar-primary: #51f0a8;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #00331b;
-  --sidebar-accent-foreground: #51f0a8;
+  --sidebar-accent: #1c1c1e;
+  --sidebar-accent-foreground: #f0f0f0;
   --sidebar-border: #353a3e;
   --sidebar-ring: #51f0a8;
 }
@@ -109,6 +119,10 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-money: var(--money);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
   --font-sans: var(--font-plus-jakarta), ui-sans-serif, system-ui, sans-serif;
   --radius-xl: var(--radius);
   --radius-2xl: 1.4rem;
@@ -177,8 +191,8 @@ body {
 
 .auth-field:focus {
   outline: none;
-  border-color: var(--ring);
-  box-shadow: 0 0 0 1px var(--ring);
+  border-color: var(--foreground);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--foreground) 18%, transparent);
 }
 
 .auth-submit {
@@ -189,7 +203,7 @@ body {
 }
 
 .auth-submit:hover:not(:disabled) {
-  filter: brightness(0.95);
+  background-color: var(--primary-hover);
 }
 
 .auth-submit:active:not(:disabled) {
@@ -198,6 +212,10 @@ body {
 
 .auth-error {
   animation: auth-enter 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+input[type="time"]::-webkit-datetime-edit-ampm-field {
+  display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
