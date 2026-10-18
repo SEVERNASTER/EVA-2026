@@ -2,15 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Icon } from "@/components/ui/icon";
 import type { UserRole } from "@/lib/auth/roles";
 
-const NAV: Record<UserRole, { href: string; label: string }[]> = {
+const NAV: Record<
+  UserRole,
+  { href: string; label: string; icon: string }[]
+> = {
   admin: [
-    { href: "/admin", label: "Cursos" },
-    { href: "/admin/inscripciones", label: "Inscripciones" },
+    { href: "/admin", label: "Cursos", icon: "menu_book" },
+    { href: "/admin/inscripciones", label: "Inscripciones", icon: "how_to_reg" },
   ],
-  instructor: [{ href: "/instructor", label: "Cursos" }],
-  estudiante: [{ href: "/estudiante", label: "Cursos" }],
+  instructor: [{ href: "/instructor", label: "Cursos", icon: "menu_book" }],
+  estudiante: [{ href: "/estudiante", label: "Cursos", icon: "school" }],
 };
 
 function isActive(href: string, pathname: string) {
@@ -24,7 +28,7 @@ export function AppNav({ role }: { role: UserRole }) {
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-1 flex-col gap-1 p-3 text-sm">
+    <nav className="flex flex-1 flex-col gap-1.5 p-3 text-sm">
       {NAV[role].map((item) => {
         const active = isActive(item.href, pathname);
         return (
@@ -33,10 +37,11 @@ export function AppNav({ role }: { role: UserRole }) {
             href={item.href}
             className={
               active
-                ? "rounded-md bg-sidebar-accent px-3 py-2 text-sidebar-accent-foreground"
-                : "rounded-md px-3 py-2 text-muted-foreground hover:text-foreground"
+                ? "flex items-center gap-2.5 rounded-2xl bg-primary px-3 py-2.5 font-medium text-primary-foreground shadow-sm"
+                : "flex items-center gap-2.5 rounded-2xl px-3 py-2.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             }
           >
+            <Icon name={item.icon} filled={active} size={20} />
             {item.label}
           </Link>
         );

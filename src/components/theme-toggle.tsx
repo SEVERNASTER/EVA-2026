@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Icon } from "@/components/ui/icon";
 
 type Theme = "light" | "dark";
 
@@ -29,7 +30,7 @@ export function ThemeToggle() {
   return (
     <button
       type="button"
-      className="rounded-md px-2 py-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+      className="inline-flex items-center gap-1.5 rounded-2xl px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
       aria-label={isDark ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
       onClick={() => {
         const next: Theme = isDark ? "light" : "dark";
@@ -37,6 +38,7 @@ export function ThemeToggle() {
         applyTheme(next);
       }}
     >
+      <Icon name={isDark ? "light_mode" : "dark_mode"} size={18} />
       {isDark ? "Claro" : "Oscuro"}
     </button>
   );
