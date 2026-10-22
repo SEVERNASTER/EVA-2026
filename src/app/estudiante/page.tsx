@@ -1,6 +1,8 @@
+import { checkEligibility } from "@/app/actions/eligibility";
 import { StudentCourseList } from "@/components/student-course-list";
 import { requireRole } from "@/lib/auth/guards";
 import type { Course } from "@/lib/courses/types";
+import type { EligibilityResult } from "@/lib/eligibility/types";
 import type { Enrollment } from "@/lib/enrollments/types";
 import { createClient } from "@/lib/supabase/server";
 import type {
@@ -62,11 +64,31 @@ export default async function StudentPage() {
     };
   }
 
+  const eligibilities: Record<string, EligibilityResult> = {};
+  if (enrolled.length) {
+    const results = await Promise.all(
+      enrolled.map((row) => checkEligibility(row.id)),
+    );
+    for (const res of results) {
+      if ("data" in res) {
+        const item = res.data;
+        const matchingEnrollment = enrolled.find(
+          (e) => e.id === item.enrollmentId,
+        );
+        if (matchingEnrollment) {
+          eligibilities[matchingEnrollment.course_id] = item;
+        }
+        eligibilities[item.enrollmentId] = item;
+      }
+    }
+  }
+
   return (
     <StudentCourseList
-        courses={(courses ?? []) as Course[]}
-        enrollments={enrollments}
-        progress={progress}
-      />
+      courses={(courses ?? []) as Course[]}
+      enrollments={enrollments}
+      progress={progress}
+      eligibilities={eligibilities}
+    />
   );
 }

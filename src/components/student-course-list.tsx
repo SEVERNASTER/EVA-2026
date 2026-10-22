@@ -8,6 +8,11 @@ import { Money } from "@/components/ui/money";
 import { formatSlot } from "@/lib/courses/schedule";
 import { courseScheduleLabel, type Course } from "@/lib/courses/types";
 import {
+  eligibilityLabel,
+  failedCriterionLabel,
+  type EligibilityResult,
+} from "@/lib/eligibility/types";
+import {
   amountForCategory,
   categoryLabel,
   studentCategoryChoiceLabel,
@@ -28,10 +33,12 @@ export function StudentCourseList({
   courses,
   enrollments,
   progress = {},
+  eligibilities = {},
 }: {
   courses: Course[];
   enrollments: Enrollment[];
   progress?: Record<string, CourseProgress>;
+  eligibilities?: Record<string, EligibilityResult>;
 }) {
   const byCourse = useMemo(() => {
     return new Map(enrollments.map((row) => [row.course_id, row]));
@@ -55,6 +62,7 @@ export function StudentCourseList({
                 course={course}
                 enrollment={byCourse.get(course.id)}
                 progress={progress[course.id]}
+                eligibility={eligibilities[course.id]}
               />
             </li>
           ))}
@@ -68,10 +76,12 @@ function StudentCourseCard({
   course,
   enrollment,
   progress,
+  eligibility,
 }: {
   course: Course;
   enrollment?: Enrollment;
   progress?: CourseProgress;
+  eligibility?: EligibilityResult;
 }) {
   const [category, setCategory] = useState<ParticipantCategory>("regular");
   const price = amountForCategory(
@@ -139,6 +149,11 @@ function StudentCourseCard({
           <Badge tone={enrollment.status === "inscrito" ? "success" : "warning"}>
             {enrollmentStatusLabel(enrollment.status, enrollment.category)}
           </Badge>
+          {enrollment.status === "inscrito" && eligibility ? (
+            <Badge tone={eligibility.eligible ? "success" : "destructive"}>
+              {eligibilityLabel(eligibility)}
+            </Badge>
+          ) : null}
           <span className="text-muted-foreground">{categoryLabel(enrollment.category)}</span>
           {enrollment.category === "beca" && enrollment.status !== "inscrito" ? (
             <span className="text-sm text-muted-foreground">
@@ -156,6 +171,19 @@ function StudentCourseCard({
                 ? ` · bajo el mínimo (${Number(course.nota_minima)})`
                 : ""}
             </span>
+          ) : null}
+          {enrollment.status === "inscrito" &&
+          eligibility &&
+          !eligibility.eligible &&
+          eligibility.reasons.length > 0 ? (
+            <div className="mt-1.5 basis-full rounded-2xl border border-destructive/30 bg-destructive/10 px-3.5 py-2.5 text-xs text-destructive">
+              <p className="font-medium">Criterios no cumplidos para certificación:</p>
+              <ul className="mt-1 list-inside list-disc space-y-0.5">
+                {eligibility.reasons.map((reason) => (
+                  <li key={reason.criterion}>{failedCriterionLabel(reason)}</li>
+                ))}
+              </ul>
+            </div>
           ) : null}
         </div>
       ) : (

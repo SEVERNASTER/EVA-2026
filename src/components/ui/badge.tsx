@@ -4,13 +4,14 @@ export function Badge({
   tone = "muted",
   children,
 }: {
-  tone?: "muted" | "success" | "warning";
+  tone?: "muted" | "success" | "warning" | "destructive";
   children: ReactNode;
 }) {
   const tones = {
     muted: "bg-muted text-muted-foreground",
     success: "bg-success text-success-foreground",
     warning: "bg-warning text-warning-foreground",
+    destructive: "bg-destructive/10 text-destructive",
   };
 
   return (

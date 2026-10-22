@@ -47,7 +47,7 @@ export function CourseForm({
     const result = course
       ? await updateCourse(course.id, formData)
       : await createCourse(formData);
-    return result ?? null;
+    return result?.error ? { error: result.error } : null;
   }
 
   const [state, formAction, pending] = useActionState(action, null);
