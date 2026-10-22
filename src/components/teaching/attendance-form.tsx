@@ -44,7 +44,7 @@ export function AttendanceForm({
       </ul>
       <div className="flex flex-wrap items-center gap-3">
         <button
-          className="auth-submit h-10 w-fit rounded-2xl bg-primary px-3 text-sm font-medium text-primary-foreground disabled:opacity-60"
+          className="auth-submit h-10 w-fit rounded-2xl bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm disabled:opacity-60"
           type="submit"
           disabled={pending}
         >

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { Icon } from "@/components/ui/icon";
 
 type Theme = "light" | "dark";
@@ -11,14 +11,21 @@ function applyTheme(theme: Theme) {
   localStorage.setItem("eva-theme", theme);
 }
 
-export function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme | null>(null);
+function subscribe(onChange: () => void) {
+  const observer = new MutationObserver(onChange);
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["class"],
+  });
+  return () => observer.disconnect();
+}
 
-  useEffect(() => {
-    setTheme(
-      document.documentElement.classList.contains("dark") ? "dark" : "light",
-    );
-  }, []);
+function readTheme(): Theme {
+  return document.documentElement.classList.contains("dark") ? "dark" : "light";
+}
+
+export function ThemeToggle() {
+  const theme = useSyncExternalStore<Theme | null>(subscribe, readTheme, () => null);
 
   if (!theme) {
     return (
@@ -34,13 +41,9 @@ export function ThemeToggle() {
   return (
     <button
       type="button"
-      className="inline-flex items-center gap-1.5 rounded-2xl px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
+      className="inline-flex items-center gap-1.5 rounded-2xl px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
       aria-label={isDark ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
-      onClick={() => {
-        const next: Theme = isDark ? "light" : "dark";
-        setTheme(next);
-        applyTheme(next);
-      }}
+      onClick={() => applyTheme(isDark ? "light" : "dark")}
     >
       <Icon name={isDark ? "light_mode" : "dark_mode"} size={18} />
       {isDark ? "Claro" : "Oscuro"}

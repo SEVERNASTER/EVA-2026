@@ -1,48 +1,47 @@
-import type { ReactNode } from "react";
 import { AuthForm } from "@/components/auth/auth-form";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { AuthFrame } from "@/components/auth/auth-frame";
+import { Icon } from "@/components/ui/icon";
 
-function AuthFrame({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) {
-  return (
-    <main className="flex min-h-full flex-1 flex-col items-center justify-center bg-background px-4 py-16">
-      <div className="mb-4 w-full max-w-[380px] flex justify-end">
-        <ThemeToggle />
-      </div>
-      <section className="auth-panel w-full max-w-[380px] rounded-[1.4rem] border border-border bg-card p-8 shadow-lg">
-        <p className="text-lg font-semibold tracking-tight text-foreground">
-          EVA
-        </p>
-        <h1 className="mt-8 text-[22px] font-semibold tracking-tight text-foreground">
-          {title}
-        </h1>
-        <div className="mt-8">{children}</div>
-      </section>
-    </main>
-  );
-}
+const DEMO_ACCOUNTS = [
+  { role: "Admin", email: "dennis-admin@eva.local" },
+  { role: "Instructor", email: "jhonatan-instructor@eva.local" },
+  { role: "Estudiante", email: "luciana-estudiante@eva.local" },
+  { role: "Estudiante", email: "rodrigo-estudiante@eva.local" },
+];
 
 export default function LoginPage() {
   return (
-    <AuthFrame title="Iniciar sesión">
+    <AuthFrame
+      title="Iniciar sesión"
+      description="Entra con tu correo para ir al panel de tu rol."
+      footer={
+        <details className="group mt-8 rounded-2xl border border-border bg-card p-4 text-sm">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-2 font-medium text-foreground">
+            <span className="inline-flex items-center gap-2">
+              <Icon name="key" size={18} className="text-primary-soft-foreground" />
+              Cuentas de demostración
+            </span>
+            <Icon
+              name="expand_more"
+              size={18}
+              className="text-muted-foreground transition-transform group-open:rotate-180"
+            />
+          </summary>
+          <ul className="mt-3 divide-y divide-border text-xs">
+            {DEMO_ACCOUNTS.map((account) => (
+              <li key={account.email} className="flex items-center justify-between gap-3 py-2">
+                <span className="font-mono text-foreground">{account.email}</span>
+                <span className="text-muted-foreground">{account.role}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Contraseña: <span className="font-mono text-foreground">eva2026</span>
+          </p>
+        </details>
+      }
+    >
       <AuthForm mode="login" />
-      <details className="mt-8 border-t border-border pt-4 text-xs text-muted-foreground">
-        <summary className="cursor-pointer hover:text-foreground">
-          Cuentas de demostración
-        </summary>
-        <ul className="mt-3 space-y-1 font-mono text-[11px]">
-          <li>dennis-admin@eva.local</li>
-          <li>jhonatan-instructor@eva.local</li>
-          <li>luciana-estudiante@eva.local</li>
-          <li>rodrigo-estudiante@eva.local</li>
-          <li>contraseña: eva2026</li>
-        </ul>
-      </details>
     </AuthFrame>
   );
 }

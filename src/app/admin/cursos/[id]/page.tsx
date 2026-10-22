@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CourseForm } from "@/components/course-form";
 import { Icon } from "@/components/ui/icon";
+import { PageHeader } from "@/components/ui/page-header";
 import { requireRole } from "@/lib/auth/guards";
 import type { Course } from "@/lib/courses/types";
 import { createClient } from "@/lib/supabase/server";
@@ -35,16 +36,20 @@ export default async function EditCoursePage({
   return (
     <div className="mx-auto w-full max-w-2xl">
       <Link
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         href="/admin"
       >
         <Icon name="arrow_back" size={16} />
         Volver
       </Link>
-      <h1 className="mt-4 text-xl font-semibold tracking-tight text-foreground">
-        Editar curso
-      </h1>
-      <div className="mt-6">
+      <div className="mt-4">
+        <PageHeader
+          icon="edit_note"
+          eyebrow="Cursos"
+          title="Editar curso"
+        />
+      </div>
+      <div className="mt-8">
         <CourseForm
           course={course as Course}
           instructors={instructors ?? []}

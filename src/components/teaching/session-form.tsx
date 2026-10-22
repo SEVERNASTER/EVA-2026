@@ -6,7 +6,7 @@ import { createSession } from "@/app/actions/teaching";
 type State = { error: string } | { ok: true } | null;
 
 const fieldClass =
-  "auth-field h-10 rounded-2xl border border-border bg-background px-3 text-sm text-foreground";
+  "auth-field h-10 rounded-2xl border border-input bg-card px-3 text-sm text-foreground";
 
 export function SessionForm({ courseId }: { courseId: string }) {
   async function action(_prev: State, formData: FormData): Promise<State> {
@@ -32,7 +32,7 @@ export function SessionForm({ courseId }: { courseId: string }) {
           />
         </label>
         <button
-          className="auth-submit h-10 rounded-2xl bg-primary px-3 text-sm font-medium text-primary-foreground disabled:opacity-60"
+          className="auth-submit h-10 rounded-2xl bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm disabled:opacity-60"
           type="submit"
           disabled={pending}
         >
