@@ -1,4 +1,7 @@
+import fs from "fs";
+import path from "path";
 import { PDFDocument, StandardFonts, rgb, type PDFFont } from "pdf-lib";
+import QRCode from "qrcode";
 import { getPublicCertificate } from "@/lib/certificates/public";
 import {
   certificatePath,
@@ -6,10 +9,9 @@ import {
   siteUrl,
 } from "@/lib/certificates/types";
 
-const ACCENT = rgb(0.118, 0.227, 0.541); // #1e3a8a
-const GOLD = rgb(0.784, 0.635, 0.29); // #c8a24a
-const MUTED = rgb(0.333, 0.376, 0.475);
-const INK = rgb(0.059, 0.09, 0.165);
+const NAVY = rgb(0.118, 0.227, 0.541); // #1e3a8a (azul institucional UMSS)
+const INK_DARK = rgb(0.06, 0.09, 0.16); // #0f172a
+const PARAGRAPH_COLOR = rgb(0.18, 0.24, 0.32); // #1e293b (tono oscuro institucional nítido)
 
 export async function GET(
   _request: Request,
@@ -23,89 +25,125 @@ export async function GET(
   }
 
   const pdf = await PDFDocument.create();
-  pdf.setTitle(`Certificado ${certificate.code}`);
-  pdf.setAuthor("EVA 2026");
+  pdf.setTitle(`Certificado ${certificate.code} - ${certificate.participant_name}`);
+  pdf.setAuthor("Universidad Mayor de San Simón - FCyT");
   pdf.setSubject(certificate.course_name);
 
-  // A4 apaisado
+  // A4 Apaisado: 841.89 x 595.28 puntos
   const page = pdf.addPage([841.89, 595.28]);
   const { width, height } = page.getSize();
-  const regular = await pdf.embedFont(StandardFonts.Helvetica);
-  const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
+  const fontRegular = await pdf.embedFont(StandardFonts.Helvetica);
+  const fontBold = await pdf.embedFont(StandardFonts.HelveticaBold);
+
+  // 1. Fondo de la plantilla oficial limpia (dibujo directo, 100% transparente)
+  const imagePath = path.join(process.cwd(), "public", "certificado-template.png");
+  if (fs.existsSync(imagePath)) {
+    const imageBytes = fs.readFileSync(imagePath);
+    const bgImage = await pdf.embedPng(imageBytes);
+    page.drawImage(bgImage, { x: 0, y: 0, width, height });
+  }
+
+  // Centro horizontal de la línea de contenido
+  const centerContentX = 498;
+
+  // 2. Nombre del estudiante (en mayúsculas centradas justo sobre la primera línea, debajo de OTORGADO A:)
+  const student = certificate.participant_name.toUpperCase();
+  const studentSize = fitSize(student, fontBold, 22, 14, 530);
+  const studentWidth = fontBold.widthOfTextAtSize(student, studentSize);
+  page.drawText(student, {
+    x: centerContentX - studentWidth / 2,
+    y: 332,
+    size: studentSize,
+    font: fontBold,
+    color: INK_DARK,
+  });
+
+  // 3. Nombre del curso (en negrita y color azul institucional)
+  const course = certificate.course_name;
+  const courseSize = fitSize(course, fontBold, 18, 12, 540);
+  const courseWidth = fontBold.widthOfTextAtSize(course, courseSize);
+  page.drawText(course, {
+    x: centerContentX - courseWidth / 2,
+    y: 254,
+    size: courseSize,
+    font: fontBold,
+    color: NAVY,
+  });
+
+  // 4. Párrafo descriptivo dinámico: tamaño 10.5 pt, color oscuro institucional rgb(0.18, 0.24, 0.32), interlineado 14 pt
+  const issuedDateFormatted = formatIssuedDate(certificate.issued_at);
+  const descLine1 =
+    "Realizado en los ambientes del Departamento de Informática y Sistemas de la";
+  const descLine2 = `Facultad de Ciencias y Tecnología, emitido el ${issuedDateFormatted}, con una duración de ${certificate.hours} horas académicas.`;
+
+  const descSize = 10.5;
+  page.drawText(descLine1, {
+    x: centerContentX - fontRegular.widthOfTextAtSize(descLine1, descSize) / 2,
+    y: 225,
+    size: descSize,
+    font: fontRegular,
+    color: PARAGRAPH_COLOR,
+  });
+
+  page.drawText(descLine2, {
+    x: centerContentX - fontRegular.widthOfTextAtSize(descLine2, descSize) / 2,
+    y: 211, // Interlineado de 14 pt exacto (225 - 14)
+    size: descSize,
+    font: fontRegular,
+    color: PARAGRAPH_COLOR,
+  });
+
+  // 5. Fecha y Ubicación: x: 485 para empezar exactamente después de la coma de "Cochabamba," sin solapamiento
+  page.drawText(issuedDateFormatted, {
+    x: 485,
+    y: 179,
+    size: 11,
+    font: fontRegular,
+    color: INK_DARK,
+  });
+
+  // 6. Parche blanco sólido para cubrir completamente el QR viejo y el texto "CERTIFICADO" de la plantilla
+  const patchX = 744;
+  const patchY = 32;
+  const patchWidth = 74;
+  const patchHeight = 88;
 
   page.drawRectangle({
-    x: 24,
-    y: 24,
-    width: width - 48,
-    height: height - 48,
-    borderColor: ACCENT,
-    borderWidth: 2,
+    x: patchX,
+    y: patchY,
+    width: patchWidth,
+    height: patchHeight,
+    color: rgb(1, 1, 1),
   });
-  page.drawRectangle({
-    x: 34,
-    y: 34,
-    width: width - 68,
-    height: height - 68,
-    borderColor: GOLD,
-    borderWidth: 0.75,
-  });
-  page.drawRectangle({ x: 24, y: height - 36, width: width - 48, height: 12, color: ACCENT });
 
-  const center = (text: string, y: number, font: PDFFont, size: number, color = INK) => {
-    const fitted = fit(text, font, size, width - 140);
-    page.drawText(fitted.text, {
-      x: (width - font.widthOfTextAtSize(fitted.text, fitted.size)) / 2,
-      y,
-      size: fitted.size,
-      font,
-      color,
-    });
-  };
-
-  center("EVA 2026 · FORMACIÓN CONTINUA", height - 90, bold, 13, GOLD);
-  center("CERTIFICADO", height - 150, bold, 40);
-  center(`de ${certificate.kind.toLowerCase()}`, height - 178, regular, 16, MUTED);
-  center("Se otorga a", height - 235, regular, 14, MUTED);
-  center(certificate.participant_name, height - 278, bold, 32);
-  center("por haber aprobado el curso", height - 318, regular, 14, MUTED);
-  center(certificate.course_name, height - 352, bold, 22, ACCENT);
-  center(
-    `con una duración de ${certificate.hours} horas académicas`,
-    height - 382,
-    regular,
-    14,
-    MUTED,
-  );
-
+  // Renderizar el código QR dinámico centrado directamente sobre el parche blanco
   const publicUrl = `${siteUrl()}${certificatePath(certificate.code)}`;
-  page.drawText(`Emitido el ${formatIssuedDate(certificate.issued_at)}`, {
-    x: 70,
-    y: 96,
-    size: 12,
-    font: regular,
-    color: INK,
+  const qrBuffer = await QRCode.toBuffer(publicUrl, {
+    width: 140,
+    margin: 0,
+    color: { dark: "#0f172a", light: "#ffffff" },
   });
-  page.drawText(`Verificación: ${publicUrl}`, {
-    x: 70,
-    y: 76,
-    size: 10,
-    font: regular,
-    color: MUTED,
+  const qrImage = await pdf.embedPng(qrBuffer);
+
+  const qrSize = 58;
+  const qrX = patchX + (patchWidth - qrSize) / 2;
+  const qrY = patchY + (patchHeight - qrSize) / 2;
+  page.drawImage(qrImage, {
+    x: qrX,
+    y: qrY,
+    width: qrSize,
+    height: qrSize,
   });
-  const codeLabel = "CÓDIGO";
+
+  // 7. Código de verificación: arriba del parche blanco con margen limpio
+  const codeLabel = `CÓDIGO: ${certificate.code}`;
+  const codeWidth = fontBold.widthOfTextAtSize(codeLabel, 8.5);
   page.drawText(codeLabel, {
-    x: width - 70 - regular.widthOfTextAtSize(codeLabel, 10),
-    y: 112,
-    size: 10,
-    font: regular,
-    color: MUTED,
-  });
-  page.drawText(certificate.code, {
-    x: width - 70 - bold.widthOfTextAtSize(certificate.code, 22),
-    y: 84,
-    size: 22,
-    font: bold,
-    color: ACCENT,
+    x: patchX + (patchWidth - codeWidth) / 2,
+    y: patchY + patchHeight + 10,
+    size: 8.5,
+    font: fontBold,
+    color: NAVY,
   });
 
   const bytes = await pdf.save();
@@ -118,10 +156,16 @@ export async function GET(
   });
 }
 
-function fit(text: string, font: PDFFont, size: number, maxWidth: number) {
-  let current = size;
-  while (current > 10 && font.widthOfTextAtSize(text, current) > maxWidth) {
-    current -= 1;
+function fitSize(
+  text: string,
+  font: PDFFont,
+  startSize: number,
+  minSize: number,
+  maxWidth: number,
+) {
+  let size = startSize;
+  while (size > minSize && font.widthOfTextAtSize(text, size) > maxWidth) {
+    size -= 0.5;
   }
-  return { text, size: current };
+  return size;
 }
