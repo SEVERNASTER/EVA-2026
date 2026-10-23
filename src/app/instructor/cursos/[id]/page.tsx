@@ -74,11 +74,12 @@ export default async function InstructorCoursePage({
     })),
   );
 
+  const sessionIds = new Set(sessions.map((s) => s.id));
   const roster: RosterEntry[] = enrollments.map((enrollment) => ({
     enrollmentId: enrollment.id,
     name: enrollment.student?.full_name || "Participante",
     category: enrollment.category,
-    present: embeddedPresent(enrollment),
+    present: embeddedPresent(enrollment, sessionIds),
     score: embeddedScore(enrollment),
   }));
 

@@ -55,8 +55,8 @@ export function embeddedScore(row: EnrollmentTeachingEmbed) {
   return grade ? Number(grade.score) : null;
 }
 
-export function embeddedPresent(row: EnrollmentTeachingEmbed) {
-  return (row.attendance ?? []).filter((entry) => entry.present).length;
+export function embeddedPresent(row: EnrollmentTeachingEmbed, validSessionIds?: Set<string>) {
+  return (row.attendance ?? []).filter((entry) => entry.present && (!validSessionIds || validSessionIds.has(entry.session_id))).length;
 }
 
 export function attendancePercent(present: number, total: number) {

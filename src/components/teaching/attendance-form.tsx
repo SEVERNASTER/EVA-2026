@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { saveAttendance } from "@/app/actions/teaching";
 
 type State = { error: string } | { ok: true } | null;
@@ -20,10 +21,19 @@ export function AttendanceForm({
   sessionId: string;
   entries: AttendanceEntry[];
 }) {
+  const router = useRouter();
+
   // Controlled presence state per enrollment
   const [presences, setPresences] = useState<Record<string, boolean>>(
     () => Object.fromEntries(entries.map((e) => [e.enrollmentId, e.present])),
   );
+
+  // Sync state whenever entries prop changes
+  useEffect(() => {
+    setPresences(
+      Object.fromEntries(entries.map((e) => [e.enrollmentId, e.present])),
+    );
+  }, [entries]);
 
   const selectedCount = Object.values(presences).filter(Boolean).length;
   const total = entries.length;
@@ -54,6 +64,13 @@ export function AttendanceForm({
 
   const [state, formAction, pending] = useActionState(action, null);
 
+  // When saved successfully, refresh server components so "Inscritos y notas" and header update immediately
+  useEffect(() => {
+    if (state && "ok" in state) {
+      router.refresh();
+    }
+  }, [state, router]);
+
   return (
     <form action={formAction} className="mt-4 flex flex-col gap-4">
       {/* Master row */}
@@ -78,12 +95,6 @@ export function AttendanceForm({
       <ul className="grid gap-2">
         {entries.map((entry) => (
           <li key={entry.enrollmentId}>
-            {/* Hidden input so unchecked values are still submitted */}
-            <input
-              type="hidden"
-              name={`present_${entry.enrollmentId}`}
-              value="false"
-            />
             <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground">
               <input
                 name={`present_${entry.enrollmentId}`}

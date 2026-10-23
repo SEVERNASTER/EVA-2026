@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { saveGrade } from "@/app/actions/teaching";
 
 type State = { error: string } | { ok: true } | null;
@@ -14,11 +15,19 @@ export function GradeForm({
   enrollmentId: string;
   score: number | null;
 }) {
+  const router = useRouter();
+
   async function action(_prev: State, formData: FormData): Promise<State> {
     return saveGrade(courseId, enrollmentId, formData);
   }
 
   const [state, formAction, pending] = useActionState(action, null);
+
+  useEffect(() => {
+    if (state && "ok" in state) {
+      router.refresh();
+    }
+  }, [state, router]);
 
   return (
     <form action={formAction} className="flex flex-col items-end gap-1">
