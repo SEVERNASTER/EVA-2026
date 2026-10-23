@@ -102,7 +102,9 @@ export async function saveAttendance(
   const rows = enrollments.map((enrollment) => ({
     session_id: sessionId,
     enrollment_id: enrollment.id,
-    present: formData.get(`present_${enrollment.id}`) === "on",
+    present: ["on", "true"].includes(
+        String(formData.get(`present_${enrollment.id}`) ?? ""),
+      ),
   }));
 
   const { error } = await supabase
