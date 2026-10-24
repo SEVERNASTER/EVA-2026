@@ -150,12 +150,15 @@ export default async function CertificatePage({
       ) : null}
 
       <div className="mx-auto -mt-10 w-full max-w-5xl px-4 pb-20">
-        {/* Lienzo del Certificado Oficial con tipografía Montserrat integrada */}
+        {/* Lienzo del Certificado Oficial con tipografía Montserrat integrada y contenedor responsivo escalable */}
         <section
           aria-label="Documento de Certificado Digital"
           className="relative mx-auto w-full max-w-4xl overflow-hidden rounded-2xl border border-border/80 bg-white shadow-2xl"
         >
-          <div className={`relative aspect-[1024/608] w-full select-none ${montserrat.className}`}>
+          <div
+            className={`@container relative aspect-[1024/608] w-full select-none ${montserrat.className}`}
+            style={{ containerType: "inline-size" }}
+          >
             {/* Imagen de fondo limpia oficial */}
             <Image
               src="/certificado-template.png"
@@ -171,49 +174,81 @@ export default async function CertificatePage({
               className="absolute left-[59.2%] top-[43%] -translate-x-1/2 -translate-y-1/2 text-center"
               style={{ width: "65%" }}
             >
-              <h1 className="truncate text-[clamp(14px,2.4vw,26px)] font-bold uppercase tracking-wide text-slate-900 drop-shadow-xs">
+              <h1
+                className="truncate font-bold uppercase tracking-wide text-slate-900 drop-shadow-xs"
+                style={{
+                  fontSize: "clamp(10px, 2.35cqw, 24px)",
+                  lineHeight: 1.2,
+                }}
+              >
                 {certificate.participant_name}
               </h1>
             </div>
 
-            {/* 2. Nombre del Curso: en negrita y color azul institucional debajo de 'Por haber completado...' */}
+            {/* 2 y 3. Bloque Central en Flujo: Nombre del curso y descripción dinámica con separación vertical garantizada */}
             <div
-              className="absolute left-[59.2%] top-[57.5%] -translate-x-1/2 -translate-y-1/2 text-center"
-              style={{ width: "70%" }}
+              className="absolute left-[59.2%] top-[55%] -translate-x-1/2 flex flex-col items-center justify-start text-center"
+              style={{
+                width: "76%",
+                maxWidth: "76%",
+                rowGap: "clamp(1.5px, 0.4cqw, 5px)",
+              }}
             >
-              <p className="line-clamp-2 text-[clamp(11px,1.9vw,21px)] font-bold text-[#1e3a8a]">
+              <p
+                className="line-clamp-2 font-bold text-[#1e3a8a]"
+                style={{
+                  fontSize: "clamp(7px, 1.65cqw, 17.5px)",
+                  lineHeight: 1.2,
+                }}
+              >
                 {certificate.course_name}
               </p>
-            </div>
-
-            {/* 3. Párrafo descriptivo dinámico: tono gris/azul slate oscuro text-slate-800 (#1e293b), tamaño text-[12.5px], font-semibold */}
-            <div
-              className="absolute left-[59.2%] top-[63.8%] -translate-x-1/2 -translate-y-1/2 text-center"
-              style={{ width: "74%", maxWidth: "74%" }}
-            >
-              <p className="text-[clamp(9.5px,1.2vw,12.5px)] font-semibold leading-[1.38] text-slate-800">
+              <p
+                className="font-semibold text-slate-800"
+                style={{
+                  fontSize: "clamp(5px, 1.05cqw, 11px)",
+                  lineHeight: 1.28,
+                }}
+              >
                 Realizado en los ambientes del Departamento de Informática y Sistemas de la Facultad de Ciencias y Tecnología, emitido el {issued}, con una duración de{" "}
                 <span className="font-bold text-slate-900">{certificate.hours} horas académicas</span>.
               </p>
             </div>
 
-            {/* 4. Fecha de Emisión: alineada a la izquierda partiendo desde la derecha de la coma de 'Cochabamba,' con espacio limpio */}
-            <div className="absolute left-[58%] top-[69.2%] -translate-y-1/2 whitespace-nowrap text-left">
-              <span className="text-[clamp(9px,1.15vw,12px)] font-medium text-slate-800">
-                {issued}
+            {/* 4. Fecha de Emisión: parche blanco centrado solo sobre el texto de la fecha */}
+            <div className="absolute left-1/2 top-[69.5%] -translate-x-1/2 -translate-y-1/2 text-center whitespace-nowrap">
+              <span
+                className="inline-block bg-white font-medium text-slate-800"
+                style={{
+                  fontSize: "clamp(5.5px, 1.08cqw, 11.5px)",
+                  lineHeight: 1,
+                  whiteSpace: "nowrap",
+                  paddingTop: "clamp(4px, 1.1cqw, 12px)",
+                  paddingBottom: "clamp(4px, 1.1cqw, 12px)",
+                  paddingLeft: "clamp(4px, 0.8cqw, 9px)",
+                  paddingRight: "clamp(4px, 0.8cqw, 9px)",
+                }}
+              >
+                Cochabamba, {issued}
               </span>
             </div>
 
             {/* 5. Código de verificación: arriba del recuadro del QR con margen claro */}
             <div className="absolute right-[2.6%] top-[69%] z-10 w-[9.8%] text-center">
-              <p className="font-mono text-[clamp(7px,0.85vw,10.5px)] font-bold tracking-widest text-[#1e3a8a]">
+              <p
+                className="font-mono font-bold tracking-widest text-[#1e3a8a]"
+                style={{
+                  fontSize: "clamp(5px, 0.85cqw, 9.5px)",
+                  lineHeight: 1,
+                }}
+              >
                 CÓDIGO: {certificate.code}
               </p>
             </div>
 
             {/* 6. Contenedor con fondo blanco sólido (bg-white z-10) que enmascara y cubre por completo el QR viejo y CERTIFICADO del fondo */}
             <div
-              className="absolute right-[2.6%] bottom-[4.2%] z-10 flex items-center justify-center rounded-md bg-white p-1.5 shadow-xs"
+              className="absolute right-[2.6%] bottom-[4.2%] z-10 flex items-center justify-center rounded-sm bg-white p-[0.3cqw] shadow-xs"
               style={{ width: "9.8%", height: "18.5%" }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -225,6 +260,10 @@ export default async function CertificatePage({
             </div>
           </div>
         </section>
+
+        <p className="mt-2.5 text-center text-xs text-muted-foreground sm:hidden">
+          Rota tu dispositivo horizontalmente para una vista ampliada del certificado.
+        </p>
 
         {/* Acciones de descarga y compartir */}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -311,3 +350,4 @@ export default async function CertificatePage({
     </main>
   );
 }
+
