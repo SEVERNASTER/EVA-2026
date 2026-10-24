@@ -60,6 +60,49 @@ export default async function CertificatePage({
   const profile = await getSessionProfile();
   const isAdmin = profile?.role === "admin";
 
+  // Si no está validado por el administrador y el visitante no es admin, bloquear visualización
+  if (!certificate.is_validated && !isAdmin) {
+    return (
+      <main className="flex min-h-dvh flex-1 flex-col bg-background">
+        <header className="brand-panel relative overflow-hidden">
+          <div className="brand-grid pointer-events-none absolute inset-0" aria-hidden />
+          <div className="relative mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-4 py-6">
+            <Link href="/" aria-label="EVA 2026">
+              <BrandMark tone="inverse" />
+            </Link>
+          </div>
+        </header>
+
+        <div className="mx-auto flex flex-1 max-w-md items-center justify-center px-4 py-16">
+          <div className="w-full rounded-[1.4rem] border border-amber-500/30 bg-card p-6 text-center shadow-sm">
+            <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-amber-500/10 text-amber-600">
+              <Icon name="pending" size={28} />
+            </div>
+            <h1 className="mt-4 text-lg font-bold text-foreground">
+              Certificado Pendiente de Aprobación
+            </h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Este certificado fue emitido con código{" "}
+              <span className="font-mono font-semibold text-foreground">
+                {certificate.code}
+              </span>
+              , pero aún se encuentra en proceso de aprobación por la administración de la facultad.
+            </p>
+            <div className="mt-6 flex justify-center">
+              <Link
+                href="/estudiante"
+                className="auth-submit inline-flex h-10 items-center gap-1.5 rounded-2xl bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm"
+              >
+                <Icon name="arrow_back" size={16} />
+                Volver a mis cursos
+              </Link>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   const publicUrl = `${siteUrl()}${certificatePath(certificate.code)}`;
   const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(publicUrl)}`;
   const issued = formatIssuedDate(certificate.issued_at);
@@ -86,17 +129,25 @@ export default async function CertificatePage({
                 className="inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-3 py-1.5 text-xs font-semibold text-primary-soft-foreground transition-colors hover:bg-primary-soft/80"
               >
                 <Icon name="verified_user" filled size={16} />
-                Validado como Admin ({profile.full_name})
+                {certificate.is_validated
+                  ? `Validado por Admin (${profile?.full_name})`
+                  : "Pendiente: Validar ahora en panel"}
               </Link>
             ) : null}
             <p className="inline-flex items-center gap-2 rounded-full bg-white/12 px-3.5 py-1.5 text-sm font-medium text-white ring-1 ring-inset ring-white/20">
               <Icon name="verified" filled size={18} className="text-[#86efac]" />
-              Certificado válido y verificado
+              Certificado oficial UMSS
             </p>
           </div>
         </div>
         <div className="h-12" aria-hidden />
       </header>
+
+      {isAdmin && !certificate.is_validated ? (
+        <div className="border-b border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-center text-xs font-semibold text-amber-900 dark:text-amber-200">
+          ⚠️ Vista preliminar de Administrador: Este certificado aún no ha sido aprobado formalmente para visualización del estudiante.
+        </div>
+      ) : null}
 
       <div className="mx-auto -mt-10 w-full max-w-5xl px-4 pb-20">
         {/* Lienzo del Certificado Oficial con tipografía Montserrat integrada */}

@@ -1,3 +1,5 @@
+export type CertificateStatus = "PENDING" | "APPROVED" | "REJECTED";
+
 export type PublicCertificate = {
   code: string;
   participant_name: string;
@@ -6,6 +8,9 @@ export type PublicCertificate = {
   kind: string;
   issued_at: string;
   instructor_name?: string;
+  is_validated?: boolean;
+  status?: CertificateStatus | string;
+  validated_at?: string | null;
 };
 
 export const CERTIFICATE_CODE_PATTERN = /^[0-9A-F]{8}$/;

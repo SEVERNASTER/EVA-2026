@@ -35,6 +35,7 @@ export type CourseOutcome = {
   enrollmentId: string;
   eligibility: Eligibility;
   certificateCode: string | null;
+  certificateIsValidated?: boolean;
 };
 
 export function StudentCourseList({
@@ -57,7 +58,7 @@ export function StudentCourseList({
   const outcomeList = Object.values(outcomes);
   const enrolledCount = enrollments.filter((row) => row.status === "inscrito").length;
   const eligibleCount = outcomeList.filter((row) => row.eligibility.eligible).length;
-  const certificateCount = outcomeList.filter((row) => row.certificateCode).length;
+  const certificateCount = outcomeList.filter((row) => row.certificateCode && row.certificateIsValidated).length;
 
   return (
     <>
@@ -257,6 +258,7 @@ function StudentCourseCard({
                 eligibility={outcome.eligibility}
                 enrollmentId={outcome.enrollmentId}
                 certificateCode={outcome.certificateCode}
+                certificateIsValidated={outcome.certificateIsValidated}
                 canIssue
               />
             </div>

@@ -19,7 +19,10 @@ import {
 type CourseWithSessions = Course & { sessions?: { count: number }[] };
 type StudentEnrollment = Enrollment &
   EnrollmentTeachingEmbed & {
-    certificates?: { code: string } | { code: string }[] | null;
+    certificates?:
+      | { code: string; is_validated?: boolean; status?: string }
+      | { code: string; is_validated?: boolean; status?: string }[]
+      | null;
   };
 
 export default async function StudentPage() {
@@ -37,7 +40,9 @@ export default async function StudentPage() {
       .order("name"),
     supabase
       .from("enrollments")
-      .select(`*, ${ENROLLMENT_TEACHING_SELECT}, certificates(code)`)
+      .select(
+        `*, ${ENROLLMENT_TEACHING_SELECT}, certificates(code, is_validated, status)`,
+      )
       .eq("student_id", profile.id),
   ]);
 
@@ -56,10 +61,13 @@ export default async function StudentPage() {
       score: embeddedScore(enrollment),
     };
     if (course) {
+      const cert = embeddedOne(enrollment.certificates);
       outcomes[enrollment.course_id] = {
         enrollmentId: enrollment.id,
         eligibility: evaluateEligibility(progress[enrollment.course_id], course),
-        certificateCode: embeddedOne(enrollment.certificates)?.code ?? null,
+        certificateCode: cert?.code ?? null,
+        certificateIsValidated:
+          cert?.is_validated === true || cert?.status === "APPROVED",
       };
     }
   }

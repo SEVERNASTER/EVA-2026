@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { PDFDocument, StandardFonts, rgb, type PDFFont } from "pdf-lib";
 import QRCode from "qrcode";
+import { getSessionProfile } from "@/lib/auth/profile";
 import { getPublicCertificate } from "@/lib/certificates/public";
 import {
   certificatePath,
@@ -22,6 +23,16 @@ export async function GET(
 
   if (!certificate) {
     return new Response("Certificado no encontrado", { status: 404 });
+  }
+
+  const profile = await getSessionProfile();
+  const isAdmin = profile?.role === "admin";
+
+  if (!certificate.is_validated && !isAdmin) {
+    return new Response(
+      "Certificado pendiente de aprobación por administración",
+      { status: 403 },
+    );
   }
 
   const pdf = await PDFDocument.create();

@@ -41,7 +41,7 @@ export type AdminValidationResult =
   | { ok: false; error: string };
 
 /**
- * Permite al administrador validar formalmente un código de certificado.
+ * Permite al administrador validar formalmente un código de certificado y marcarlo como aprobado.
  */
 export async function validateCertificateAdmin(
   rawCode: string,
@@ -65,10 +65,67 @@ export async function validateCertificateAdmin(
     };
   }
 
+  const supabase = await createClient();
+  const validatedAt = new Date().toISOString();
+
+  // Actualiza en base de datos el estado de validación y auditoría
+  const { error: updateError } = await supabase
+    .from("certificates")
+    .update({
+      is_validated: true,
+      status: "APPROVED",
+      validated_at: validatedAt,
+      validated_by: admin.id,
+    })
+    .eq("code", code);
+
+  if (updateError) {
+    // Si la actualización por supabase client falla por RLS o función, intentamos rpc
+    await supabase.rpc("approve_certificate", { p_code: code });
+  }
+
+  revalidatePath("/estudiante");
+  revalidatePath("/admin/inscripciones");
+  revalidatePath("/admin/verificar");
+  revalidatePath(`/certificado/${code}`);
+
   return {
     ok: true,
-    certificate,
-    validatedAt: new Date().toISOString(),
+    certificate: {
+      ...certificate,
+      is_validated: true,
+      status: "APPROVED",
+      validated_at: validatedAt,
+    },
+    validatedAt,
     validatedBy: admin.full_name,
   };
+}
+
+/**
+ * Permite al administrador aprobar directamente un certificado desde el panel de inscripciones.
+ */
+export async function approveCertificateByEnrollment(
+  enrollmentId: string,
+): Promise<{ error: string } | { ok: true }> {
+  const admin = await requireRole("admin");
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("certificates")
+    .update({
+      is_validated: true,
+      status: "APPROVED",
+      validated_at: new Date().toISOString(),
+      validated_by: admin.id,
+    })
+    .eq("enrollment_id", enrollmentId);
+
+  if (error) {
+    return { error: "No se pudo validar el certificado." };
+  }
+
+  revalidatePath("/estudiante");
+  revalidatePath("/admin/inscripciones");
+  return { ok: true };
 }

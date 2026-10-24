@@ -1,3 +1,4 @@
+import { AdminApproveCertificateButton } from "@/components/admin-approve-certificate-button";
 import { ConfirmEnrollmentButtons } from "@/components/confirm-enrollment-buttons";
 import { EligibilityStatus } from "@/components/eligibility-status";
 import { Badge } from "@/components/ui/badge";
@@ -31,10 +32,17 @@ type AdminEnrollment = Enrollment &
       asistencia_minima: number;
       sessions?: { count: number }[];
     } | null;
-    certificates?: { code: string } | { code: string }[] | null;
+    certificates?:
+      | { code: string; is_validated?: boolean; status?: string }
+      | { code: string; is_validated?: boolean; status?: string }[]
+      | null;
   };
 
-type Outcome = { eligibility: Eligibility; certificateCode: string | null };
+type Outcome = {
+  eligibility: Eligibility;
+  certificateCode: string | null;
+  certificateIsValidated: boolean;
+};
 
 export default async function AdminEnrollmentsPage() {
   await requireRole("admin");
@@ -42,7 +50,7 @@ export default async function AdminEnrollmentsPage() {
   const { data } = await supabase
     .from("enrollments")
     .select(
-      `*, course:courses(name, nota_minima, asistencia_minima, sessions(count)), student:profiles!student_id(full_name), ${ENROLLMENT_TEACHING_SELECT}, certificates(code)`,
+      `*, course:courses(name, nota_minima, asistencia_minima, sessions(count)), student:profiles!student_id(full_name), ${ENROLLMENT_TEACHING_SELECT}, certificates(code, is_validated, status)`,
     )
     .order("created_at", { ascending: false });
 
@@ -52,7 +60,10 @@ export default async function AdminEnrollmentsPage() {
   );
   const pendingAid = rows.filter(isScholarshipRequest);
   const confirmed = rows.filter((row) => row.status === "inscrito");
-  const pendingTotal = pendingPay.reduce((sum, row) => sum + Number(row.amount), 0);
+  const pendingTotal = pendingPay.reduce(
+    (sum, row) => sum + Number(row.amount),
+    0,
+  );
   const confirmedTotal = confirmed.reduce(
     (sum, row) => sum + Number(row.amount),
     0,
@@ -125,9 +136,12 @@ function buildOutcomes(confirmed: AdminEnrollment[]) {
       present: embeddedPresent(row),
       score: embeddedScore(row),
     };
+    const cert = embeddedOne(row.certificates);
     outcomes.set(row.id, {
       eligibility: evaluateEligibility(progress, row.course),
-      certificateCode: embeddedOne(row.certificates)?.code ?? null,
+      certificateCode: cert?.code ?? null,
+      certificateIsValidated:
+        cert?.is_validated === true || cert?.status === "APPROVED",
     });
   }
   return outcomes;
@@ -176,50 +190,62 @@ function EnrollmentList({
                       {(row.student?.full_name ?? "?").trim().charAt(0).toUpperCase()}
                     </span>
                     <div className="min-w-0 flex-1">
-                    <p className="font-medium text-foreground">
-                      {row.student?.full_name ?? "—"}
-                    </p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {row.course?.name ?? "—"} · {categoryLabel(row.category)}
-                    </p>
-                    <div className="mt-2 flex flex-wrap items-center gap-2">
-                      {scholarship ? (
-                        <span className="text-sm text-muted-foreground">Sin cobro si se confirma</span>
-                      ) : (
-                        <Money value={row.amount} />
-                      )}
-                      <Badge
-                        tone={
-                          row.status === "inscrito"
-                            ? "success"
-                            : scholarship
-                              ? "info"
-                              : "warning"
-                        }
-                        dot
-                      >
-                        {enrollmentStatusLabel(row.status, row.category)}
-                      </Badge>
-                      {!showActions ? (
-                        <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
-                          <Icon
-                            name={row.settlement === "beca" ? "workspace_premium" : "point_of_sale"}
-                            size={16}
-                          />
-                          {row.settlement === "beca" ? "Beca" : "Caja"}
-                        </span>
-                      ) : null}
-                    </div>
-                    {outcome ? (
-                      <div className="mt-3">
-                        <EligibilityStatus
-                          eligibility={outcome.eligibility}
-                          enrollmentId={row.id}
-                          certificateCode={outcome.certificateCode}
-                          canIssue
-                        />
+                      <p className="font-medium text-foreground">
+                        {row.student?.full_name ?? "—"}
+                      </p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {row.course?.name ?? "—"} · {categoryLabel(row.category)}
+                      </p>
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        {scholarship ? (
+                          <span className="text-sm text-muted-foreground">
+                            Sin cobro si se confirma
+                          </span>
+                        ) : (
+                          <Money value={row.amount} />
+                        )}
+                        <Badge
+                          tone={
+                            row.status === "inscrito"
+                              ? "success"
+                              : scholarship
+                                ? "info"
+                                : "warning"
+                          }
+                          dot
+                        >
+                          {enrollmentStatusLabel(row.status, row.category)}
+                        </Badge>
+                        {!showActions ? (
+                          <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+                            <Icon
+                              name={
+                                row.settlement === "beca"
+                                  ? "workspace_premium"
+                                  : "point_of_sale"
+                              }
+                              size={16}
+                            />
+                            {row.settlement === "beca" ? "Beca" : "Caja"}
+                          </span>
+                        ) : null}
                       </div>
-                    ) : null}
+                      {outcome ? (
+                        <div className="mt-3 flex flex-wrap items-center gap-3">
+                          <EligibilityStatus
+                            eligibility={outcome.eligibility}
+                            enrollmentId={row.id}
+                            certificateCode={outcome.certificateCode}
+                            certificateIsValidated={outcome.certificateIsValidated}
+                            canIssue
+                            isAdmin
+                          />
+                          {outcome.certificateCode &&
+                          !outcome.certificateIsValidated ? (
+                            <AdminApproveCertificateButton enrollmentId={row.id} />
+                          ) : null}
+                        </div>
+                      ) : null}
                     </div>
                   </div>
                   {showActions ? (
