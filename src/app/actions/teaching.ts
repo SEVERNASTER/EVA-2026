@@ -10,8 +10,11 @@ const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 function revalidateCoursePaths(courseId: string) {
   revalidatePath(`/instructor/cursos/${courseId}`);
+  revalidatePath(`/instructor/cursos/${courseId}`, "page");
   revalidatePath("/instructor");
+  revalidatePath("/instructor", "page");
   revalidatePath("/estudiante");
+  revalidatePath("/estudiante", "page");
 }
 
 export async function createSession(
@@ -99,11 +102,15 @@ export async function saveAttendance(
     return { error: "El curso no tiene participantes inscritos." };
   }
 
-  const rows = enrollments.map((enrollment) => ({
-    session_id: sessionId,
-    enrollment_id: enrollment.id,
-    present: formData.get(`present_${enrollment.id}`) === "on",
-  }));
+  const rows = enrollments.map((enrollment) => {
+    const rawValues = formData.getAll(`present_${enrollment.id}`);
+    const isPresent = rawValues.some((v) => v === "on" || v === "true");
+    return {
+      session_id: sessionId,
+      enrollment_id: enrollment.id,
+      present: isPresent,
+    };
+  });
 
   const { error } = await supabase
     .from("attendance")

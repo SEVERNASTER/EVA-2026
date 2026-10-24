@@ -60,37 +60,19 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(login);
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  const role =
-    profile && isUserRole(profile.role) ? profile.role : "estudiante";
-  const home = panelPath(role);
-
+  // Solo hace falta el rol para mandar al panel desde "/" o las pantallas de acceso.
+  // Cada sección (/admin, /instructor, /estudiante) valida su rol en su layout.
   if (pathname === "/" || AUTH_PATHS.has(pathname)) {
-    const target = request.nextUrl.clone();
-    target.pathname = home;
-    return NextResponse.redirect(target);
-  }
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
 
-  if (pathname.startsWith("/admin") && role !== "admin") {
+    const role =
+      profile && isUserRole(profile.role) ? profile.role : "estudiante";
     const target = request.nextUrl.clone();
-    target.pathname = home;
-    return NextResponse.redirect(target);
-  }
-
-  if (pathname.startsWith("/instructor") && role !== "instructor") {
-    const target = request.nextUrl.clone();
-    target.pathname = home;
-    return NextResponse.redirect(target);
-  }
-
-  if (pathname.startsWith("/estudiante") && role !== "estudiante") {
-    const target = request.nextUrl.clone();
-    target.pathname = home;
+    target.pathname = panelPath(role);
     return NextResponse.redirect(target);
   }
 

@@ -14,7 +14,7 @@ type InstructorOption = { id: string; full_name: string };
 type State = { error: string } | null;
 
 const fieldClass =
-  "auth-field h-11 w-full rounded-2xl border border-border bg-background px-3.5 text-sm text-foreground";
+  "auth-field h-11 w-full rounded-2xl border border-input bg-card px-3.5 text-sm text-foreground";
 
 function Field({
   label,
@@ -47,7 +47,7 @@ export function CourseForm({
     const result = course
       ? await updateCourse(course.id, formData)
       : await createCourse(formData);
-    return result ?? null;
+    return result?.error ? { error: result.error } : null;
   }
 
   const [state, formAction, pending] = useActionState(action, null);
@@ -71,7 +71,12 @@ export function CourseForm({
       className="rounded-[1.4rem] border border-border bg-card p-5 shadow-sm md:p-7"
     >
       <fieldset className="grid gap-5 md:grid-cols-2">
-        <legend className="mb-4 text-sm font-semibold text-foreground">Identidad</legend>
+        <legend className="mb-4 flex items-center gap-2 text-sm font-semibold text-foreground">
+          <span className="flex size-7 items-center justify-center rounded-lg bg-primary-soft text-primary-soft-foreground">
+            <Icon name="badge" size={16} />
+          </span>
+          Datos del curso
+        </legend>
         <Field className="md:col-span-2" label="Nombre">
           <input
             className={fieldClass}
@@ -83,7 +88,7 @@ export function CourseForm({
 
         <Field className="md:col-span-2" label="Contenido">
           <textarea
-            className="auth-field min-h-32 w-full resize-y rounded-2xl border border-border bg-background px-3.5 py-3 text-sm text-foreground"
+            className="auth-field min-h-32 w-full resize-y rounded-2xl border border-input bg-card px-3.5 py-3 text-sm text-foreground"
             name="content"
             required
             defaultValue={course?.content}
@@ -175,7 +180,7 @@ export function CourseForm({
           ))}
           <button
             type="button"
-            className="inline-flex w-fit items-center gap-1 rounded-2xl px-3 py-2 text-sm text-foreground hover:bg-muted"
+            className="inline-flex w-fit items-center gap-1 rounded-2xl border border-dashed border-input px-3 py-2 text-sm font-medium text-primary-soft-foreground hover:bg-primary-soft"
             onClick={() => setSlots((current) => [...current, emptySlot()])}
           >
             <Icon name="add" size={16} />
@@ -185,7 +190,12 @@ export function CourseForm({
       </fieldset>
 
       <fieldset className="mt-8 grid gap-5 border-t border-border pt-6 md:grid-cols-2">
-        <legend className="mb-4 text-sm font-semibold text-foreground">Precios</legend>
+        <legend className="mb-4 flex items-center gap-2 text-sm font-semibold text-foreground">
+          <span className="flex size-7 items-center justify-center rounded-lg bg-primary-soft text-primary-soft-foreground">
+            <Icon name="payments" size={16} />
+          </span>
+          Precios
+        </legend>
         <Field label="Precio regular (Bs)">
           <input
             className={fieldClass}
@@ -215,7 +225,12 @@ export function CourseForm({
       </fieldset>
 
       <fieldset className="mt-8 grid gap-5 border-t border-border pt-6 md:grid-cols-2">
-        <legend className="mb-4 text-sm font-semibold text-foreground">Requisitos</legend>
+        <legend className="mb-4 flex items-center gap-2 text-sm font-semibold text-foreground">
+          <span className="flex size-7 items-center justify-center rounded-lg bg-primary-soft text-primary-soft-foreground">
+            <Icon name="rule" size={16} />
+          </span>
+          Instructor y aprobación
+        </legend>
         <Field className="md:col-span-2" label="Instructor">
           <span className="relative block">
             <select
@@ -274,14 +289,14 @@ export function CourseForm({
             type="checkbox"
             defaultChecked={course?.published}
           />
-          <span className="flex size-6 items-center justify-center rounded-lg border-2 border-muted-foreground bg-background peer-checked:border-primary peer-checked:bg-primary peer-checked:[&_.material-symbols-outlined]:opacity-100 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-foreground">
+          <span className="flex size-6 items-center justify-center rounded-lg border-2 border-muted-foreground bg-background peer-checked:border-primary peer-checked:bg-primary peer-checked:[&_.material-symbols-outlined]:opacity-100 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ring">
             <Icon name="check" size={16} className="text-primary-foreground opacity-0" />
           </span>
           Publicado (visible en el catálogo)
         </label>
 
         <button
-          className="auth-submit inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-primary px-5 text-sm font-medium text-primary-foreground disabled:opacity-60"
+          className="auth-submit inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm disabled:opacity-60"
           type="submit"
           disabled={pending}
         >
