@@ -66,7 +66,7 @@ export function StudentCourseList({
         icon="school"
         eyebrow="Estudiante"
         title="Tus cursos"
-        description="Sigue tu asistencia y nota en cada curso. Cuando cumplas los criterios, emite tu certificado verificable."
+        description="Sigue tu asistencia y nota. Cuando apruebes, administración emitirá tu certificado verificable."
       />
 
       <StatGrid>
@@ -259,7 +259,7 @@ function StudentCourseCard({
                 enrollmentId={outcome.enrollmentId}
                 certificateCode={outcome.certificateCode}
                 certificateIsValidated={outcome.certificateIsValidated}
-                canIssue
+                canIssue={false}
               />
             </div>
           ) : null}

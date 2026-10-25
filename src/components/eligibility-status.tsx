@@ -14,17 +14,18 @@ export function EligibilityStatus({
   certificateCode,
   certificateIsValidated = false,
   canIssue,
-  isAdmin = false,
+  waitingHint = "Administración emitirá tu certificado",
 }: {
   eligibility: Eligibility;
   enrollmentId: string;
   certificateCode: string | null;
   certificateIsValidated?: boolean;
   canIssue: boolean;
-  isAdmin?: boolean;
+  waitingHint?: string | null;
 }) {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const issued = Boolean(certificateCode && certificateIsValidated);
 
   async function issue() {
     setError(null);
@@ -35,8 +36,6 @@ export function EligibilityStatus({
     }
     setPending(false);
   }
-
-  const isValidated = certificateIsValidated || isAdmin;
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -50,35 +49,17 @@ export function EligibilityStatus({
             {item.message}
           </span>
         ))}
-        {certificateCode ? (
-          isValidated ? (
-            <Link
-              className="inline-flex items-center gap-1.5 rounded-2xl bg-gold-soft px-3 py-1.5 text-sm font-semibold text-gold-foreground ring-1 ring-inset ring-gold/40 transition-colors hover:bg-gold/20"
-              href={certificatePath(certificateCode)}
-            >
-              <Icon name="workspace_premium" filled size={16} />
-              Ver certificado
-              <span className="font-mono text-xs tracking-wider">{certificateCode}</span>
-            </Link>
-          ) : (
-            <>
-              <button
-                type="button"
-                disabled
-                aria-disabled="true"
-                className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-2xl bg-muted px-3 py-1.5 text-sm font-semibold text-muted-foreground opacity-60 ring-1 ring-border"
-                title="El certificado debe ser aprobado por la administración antes de poder visualizarlo"
-              >
-                <Icon name="workspace_premium" size={16} />
-                Ver certificado
-                <span className="font-mono text-xs tracking-wider">{certificateCode}</span>
-              </button>
-              <Badge tone="warning">
-                <span>⏳</span>
-                Pendiente de aprobación por administración
-              </Badge>
-            </>
-          )
+        {issued ? (
+          <Link
+            className="inline-flex items-center gap-1.5 rounded-2xl bg-gold-soft px-3 py-1.5 text-sm font-semibold text-gold-foreground ring-1 ring-inset ring-gold/40 transition-colors hover:bg-gold/20"
+            href={certificatePath(certificateCode!)}
+          >
+            <Icon name="workspace_premium" filled size={16} />
+            Ver certificado
+            <span className="font-mono text-xs tracking-wider">
+              {certificateCode}
+            </span>
+          </Link>
         ) : eligibility.eligible && canIssue ? (
           <button
             className="auth-submit inline-flex items-center gap-1.5 rounded-2xl bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm disabled:opacity-50"
@@ -89,6 +70,8 @@ export function EligibilityStatus({
             <Icon name="workspace_premium" size={16} />
             {pending ? "Emitiendo…" : "Emitir certificado"}
           </button>
+        ) : eligibility.eligible && waitingHint ? (
+          <span className="text-sm text-muted-foreground">{waitingHint}</span>
         ) : null}
       </div>
       {error ? <p className="text-xs text-destructive">{error}</p> : null}

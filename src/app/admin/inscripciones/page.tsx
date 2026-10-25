@@ -1,4 +1,3 @@
-import { AdminApproveCertificateButton } from "@/components/admin-approve-certificate-button";
 import { ConfirmEnrollmentButtons } from "@/components/confirm-enrollment-buttons";
 import { EligibilityStatus } from "@/components/eligibility-status";
 import { Badge } from "@/components/ui/badge";
@@ -69,6 +68,10 @@ export default async function AdminEnrollmentsPage() {
     0,
   );
   const outcomes = buildOutcomes(confirmed);
+  const pendingCertificates = confirmed.filter((row) => {
+    const outcome = outcomes.get(row.id);
+    return outcome?.eligibility.eligible && !outcome.certificateIsValidated;
+  });
 
   return (
     <>
@@ -76,7 +79,7 @@ export default async function AdminEnrollmentsPage() {
         icon="how_to_reg"
         eyebrow="Caja"
         title="Inscripciones"
-        description="Caja registra el pago o confirma una solicitud de beca. El estudiante no queda inscrito hasta esa revisión."
+        description="Caja registra el pago o confirma una solicitud de beca. El certificado lo emite administración cuando el inscrito ya es apto."
       />
 
       <StatGrid>
@@ -101,6 +104,13 @@ export default async function AdminEnrollmentsPage() {
           hint={plural(confirmed.length, "participante", "participantes")}
           tone="success"
         />
+        <StatCard
+          icon="license"
+          label="Pendientes de certificado"
+          value={pendingCertificates.length}
+          hint="Aptos sin diploma emitido"
+          tone="gold"
+        />
       </StatGrid>
 
       <EnrollmentList
@@ -114,6 +124,14 @@ export default async function AdminEnrollmentsPage() {
         empty="No hay solicitudes de beca por revisar."
         rows={pendingAid}
         showActions
+      />
+      <EnrollmentList
+        title="Pendientes de certificado"
+        empty="No hay inscritos aptos esperando emisión."
+        rows={pendingCertificates}
+        showActions={false}
+        outcomes={outcomes}
+        canIssueCertificates
       />
       <EnrollmentList
         title="Inscritos"
@@ -157,12 +175,14 @@ function EnrollmentList({
   rows,
   showActions,
   outcomes,
+  canIssueCertificates = false,
 }: {
   title: string;
   empty: string;
   rows: AdminEnrollment[];
   showActions: boolean;
   outcomes?: Map<string, Outcome>;
+  canIssueCertificates?: boolean;
 }) {
   return (
     <section className="mt-10">
@@ -237,13 +257,9 @@ function EnrollmentList({
                             enrollmentId={row.id}
                             certificateCode={outcome.certificateCode}
                             certificateIsValidated={outcome.certificateIsValidated}
-                            canIssue
-                            isAdmin
+                            canIssue={canIssueCertificates}
+                            waitingHint={null}
                           />
-                          {outcome.certificateCode &&
-                          !outcome.certificateIsValidated ? (
-                            <AdminApproveCertificateButton enrollmentId={row.id} />
-                          ) : null}
                         </div>
                       ) : null}
                     </div>
