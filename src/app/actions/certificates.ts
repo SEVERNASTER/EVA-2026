@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireProfile, requireRole } from "@/lib/auth/guards";
+import { requireRole } from "@/lib/auth/guards";
 import { getPublicCertificate } from "@/lib/certificates/public";
 import {
   normalizeCertificateCode,
@@ -12,11 +12,7 @@ import { createClient } from "@/lib/supabase/server";
 type Result = { error: string } | { ok: true; code: string };
 
 export async function issueCertificate(enrollmentId: string): Promise<Result> {
-  const profile = await requireProfile();
-  if (profile.role !== "admin" && profile.role !== "estudiante") {
-    return { error: "Solo el titular o el admin emiten el certificado." };
-  }
-
+  await requireRole("admin");
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("issue_certificate", {
     p_enrollment_id: enrollmentId,
@@ -33,20 +29,19 @@ export async function issueCertificate(enrollmentId: string): Promise<Result> {
 
   revalidatePath("/estudiante");
   revalidatePath("/admin/inscripciones");
+  revalidatePath(`/certificado/${data}`);
   return { ok: true, code: data };
 }
 
-export type AdminValidationResult =
-  | { ok: true; certificate: PublicCertificate; validatedAt: string; validatedBy: string }
+export type CertificateLookupResult =
+  | { ok: true; certificate: PublicCertificate }
   | { ok: false; error: string };
 
-/**
- * Permite al administrador validar formalmente un código de certificado y marcarlo como aprobado.
- */
-export async function validateCertificateAdmin(
+/** Consulta un código. No emite ni cambia el estado del certificado. */
+export async function lookupCertificateAdmin(
   rawCode: string,
-): Promise<AdminValidationResult> {
-  const admin = await requireRole("admin");
+): Promise<CertificateLookupResult> {
+  await requireRole("admin");
   const code = normalizeCertificateCode(rawCode);
 
   if (!code) {
@@ -65,67 +60,5 @@ export async function validateCertificateAdmin(
     };
   }
 
-  const supabase = await createClient();
-  const validatedAt = new Date().toISOString();
-
-  // Actualiza en base de datos el estado de validación y auditoría
-  const { error: updateError } = await supabase
-    .from("certificates")
-    .update({
-      is_validated: true,
-      status: "APPROVED",
-      validated_at: validatedAt,
-      validated_by: admin.id,
-    })
-    .eq("code", code);
-
-  if (updateError) {
-    // Si la actualización por supabase client falla por RLS o función, intentamos rpc
-    await supabase.rpc("approve_certificate", { p_code: code });
-  }
-
-  revalidatePath("/estudiante");
-  revalidatePath("/admin/inscripciones");
-  revalidatePath("/admin/verificar");
-  revalidatePath(`/certificado/${code}`);
-
-  return {
-    ok: true,
-    certificate: {
-      ...certificate,
-      is_validated: true,
-      status: "APPROVED",
-      validated_at: validatedAt,
-    },
-    validatedAt,
-    validatedBy: admin.full_name,
-  };
-}
-
-/**
- * Permite al administrador aprobar directamente un certificado desde el panel de inscripciones.
- */
-export async function approveCertificateByEnrollment(
-  enrollmentId: string,
-): Promise<{ error: string } | { ok: true }> {
-  const admin = await requireRole("admin");
-  const supabase = await createClient();
-
-  const { error } = await supabase
-    .from("certificates")
-    .update({
-      is_validated: true,
-      status: "APPROVED",
-      validated_at: new Date().toISOString(),
-      validated_by: admin.id,
-    })
-    .eq("enrollment_id", enrollmentId);
-
-  if (error) {
-    return { error: "No se pudo validar el certificado." };
-  }
-
-  revalidatePath("/estudiante");
-  revalidatePath("/admin/inscripciones");
-  return { ok: true };
+  return { ok: true, certificate };
 }
