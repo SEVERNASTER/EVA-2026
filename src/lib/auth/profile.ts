@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { isUserRole, type UserRole } from "@/lib/auth/roles";
 
@@ -7,7 +8,8 @@ export type Profile = {
   role: UserRole;
 };
 
-export async function getSessionProfile(): Promise<Profile | null> {
+/** Una sola consulta por request aunque layout, página y acción la pidan. */
+export const getSessionProfile = cache(async (): Promise<Profile | null> => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -28,4 +30,4 @@ export async function getSessionProfile(): Promise<Profile | null> {
   }
 
   return data as Profile;
-}
+});

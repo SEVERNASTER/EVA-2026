@@ -33,9 +33,9 @@ export function AuthForm({ mode }: { mode: Mode }) {
     <form action={formAction} className="flex flex-col gap-4">
       {!isLogin ? (
         <label className="flex flex-col gap-2 text-sm">
-          <span className="text-muted-foreground">Nombre</span>
+          <span className="font-medium text-foreground">Nombre</span>
           <input
-            className="auth-field h-11 rounded-2xl border border-border bg-background px-3.5 text-sm text-foreground"
+            className="auth-field h-11 rounded-2xl border border-input bg-card px-3.5 text-sm text-foreground"
             name="full_name"
             autoComplete="name"
             required
@@ -44,10 +44,10 @@ export function AuthForm({ mode }: { mode: Mode }) {
       ) : null}
 
       <label className="flex flex-col gap-2 text-sm">
-        <span className="text-muted-foreground">Correo</span>
+        <span className="font-medium text-foreground">Correo</span>
         <input
-            className="auth-field h-11 rounded-2xl border border-border bg-background px-3.5 text-sm text-foreground"
-            name="email"
+          className="auth-field h-11 rounded-2xl border border-input bg-card px-3.5 text-sm text-foreground"
+          name="email"
           type="email"
           autoComplete="email"
           required
@@ -55,10 +55,10 @@ export function AuthForm({ mode }: { mode: Mode }) {
       </label>
 
       <label className="flex flex-col gap-2 text-sm">
-        <span className="text-muted-foreground">Contraseña</span>
+        <span className="font-medium text-foreground">Contraseña</span>
         <input
-            className="auth-field h-11 rounded-2xl border border-border bg-background px-3.5 text-sm text-foreground"
-            name="password"
+          className="auth-field h-11 rounded-2xl border border-input bg-card px-3.5 text-sm text-foreground"
+          name="password"
           type="password"
           autoComplete={isLogin ? "current-password" : "new-password"}
           minLength={6}
@@ -73,11 +73,11 @@ export function AuthForm({ mode }: { mode: Mode }) {
       ) : null}
 
       <button
-        className="auth-submit mt-1 h-11 rounded-2xl bg-primary text-sm font-medium text-primary-foreground disabled:opacity-60"
+        className="auth-submit mt-2 h-11 rounded-2xl bg-primary text-sm font-semibold text-primary-foreground shadow-sm disabled:opacity-60"
         type="submit"
         disabled={pending}
       >
-        {pending ? "Entrando…" : isLogin ? "Continuar" : "Crear cuenta"}
+        {pending ? (isLogin ? "Entrando…" : "Creando…") : isLogin ? "Continuar" : "Crear cuenta"}
       </button>
 
       <p className="text-center text-sm text-muted-foreground">
@@ -85,7 +85,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
           <>
             ¿No tienes cuenta?{" "}
             <Link
-              className="text-foreground underline-offset-4 hover:underline"
+              className="font-medium text-primary-soft-foreground underline-offset-4 hover:underline"
               href="/registro"
             >
               Registrarse
@@ -95,7 +95,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
           <>
             ¿Ya tienes cuenta?{" "}
             <Link
-              className="text-foreground underline-offset-4 hover:underline"
+              className="font-medium text-primary-soft-foreground underline-offset-4 hover:underline"
               href="/login"
             >
               Iniciar sesión

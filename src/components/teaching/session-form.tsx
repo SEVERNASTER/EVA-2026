@@ -1,19 +1,28 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { createSession } from "@/app/actions/teaching";
 
 type State = { error: string } | { ok: true } | null;
 
 const fieldClass =
-  "auth-field h-10 rounded-2xl border border-border bg-background px-3 text-sm text-foreground";
+  "auth-field h-10 rounded-2xl border border-input bg-card px-3 text-sm text-foreground";
 
 export function SessionForm({ courseId }: { courseId: string }) {
+  const router = useRouter();
+
   async function action(_prev: State, formData: FormData): Promise<State> {
     return createSession(courseId, formData);
   }
 
   const [state, formAction, pending] = useActionState(action, null);
+
+  useEffect(() => {
+    if (state && "ok" in state) {
+      router.refresh();
+    }
+  }, [state, router]);
 
   return (
     <form action={formAction} className="mt-4 flex flex-col gap-3">
@@ -32,7 +41,7 @@ export function SessionForm({ courseId }: { courseId: string }) {
           />
         </label>
         <button
-          className="auth-submit h-10 rounded-2xl bg-primary px-3 text-sm font-medium text-primary-foreground disabled:opacity-60"
+          className="auth-submit h-10 rounded-2xl bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm disabled:opacity-60"
           type="submit"
           disabled={pending}
         >

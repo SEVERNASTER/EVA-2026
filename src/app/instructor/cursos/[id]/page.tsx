@@ -4,15 +4,21 @@ import { AttendanceForm } from "@/components/teaching/attendance-form";
 import { DeleteSessionButton } from "@/components/teaching/delete-session-button";
 import { GradeForm } from "@/components/teaching/grade-form";
 import { SessionForm } from "@/components/teaching/session-form";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Icon } from "@/components/ui/icon";
+import { PageHeader } from "@/components/ui/page-header";
 import { requireRole } from "@/lib/auth/guards";
-import type { Course } from "@/lib/courses/types";
+import { courseScheduleLabel, type Course } from "@/lib/courses/types";
 import { categoryLabel, type Enrollment } from "@/lib/enrollments/types";
 import { createClient } from "@/lib/supabase/server";
 import {
+  embeddedPresent,
+  embeddedScore,
+  ENROLLMENT_TEACHING_SELECT,
   formatAttendance,
   formatSessionDate,
   type AttendanceRow,
-  type Grade,
+  type EnrollmentTeachingEmbed,
   type RosterEntry,
   type Session,
 } from "@/lib/teaching/types";
@@ -28,68 +34,53 @@ export default async function InstructorCoursePage({
   const profile = await requireRole("instructor");
   const supabase = await createClient();
 
-  const { data: course } = await supabase
-    .from("courses")
-    .select("*")
-    .eq("id", id)
-    .eq("instructor_id", profile.id)
-    .maybeSingle();
+  // Una sola tanda: curso, sesiones e inscritos con su asistencia y nota embebidas.
+  const [{ data: course }, { data: sessionData }, { data: enrollmentData }] =
+    await Promise.all([
+      supabase
+        .from("courses")
+        .select("*, course_schedule_slots(*)")
+        .eq("id", id)
+        .eq("instructor_id", profile.id)
+        .maybeSingle(),
+      supabase
+        .from("sessions")
+        .select("*")
+        .eq("course_id", id)
+        .order("session_date"),
+      supabase
+        .from("enrollments")
+        .select(`*, student:profiles!student_id(full_name), ${ENROLLMENT_TEACHING_SELECT}`)
+        .eq("course_id", id)
+        .eq("status", "inscrito"),
+    ]);
 
   if (!course) {
     notFound();
   }
 
-  const [{ data: sessionData }, { data: enrollmentData }] = await Promise.all([
-    supabase
-      .from("sessions")
-      .select("*")
-      .eq("course_id", id)
-      .order("session_date"),
-    supabase
-      .from("enrollments")
-      .select("*, student:profiles!student_id(full_name)")
-      .eq("course_id", id)
-      .eq("status", "inscrito"),
-  ]);
-
   const sessions = (sessionData ?? []) as Session[];
-  const enrollments = ((enrollmentData ?? []) as Enrollment[]).sort((a, b) =>
+  const enrollments = (
+    (enrollmentData ?? []) as (Enrollment & EnrollmentTeachingEmbed)[]
+  ).sort((a, b) =>
     (a.student?.full_name ?? "").localeCompare(b.student?.full_name ?? ""),
   );
-  const sessionIds = sessions.map((session) => session.id);
-  const enrollmentIds = enrollments.map((enrollment) => enrollment.id);
 
-  const [{ data: attendanceData }, { data: gradeData }] = await Promise.all([
-    sessionIds.length && enrollmentIds.length
-      ? supabase
-          .from("attendance")
-          .select("session_id, enrollment_id, present")
-          .in("session_id", sessionIds)
-      : Promise.resolve({ data: [] }),
-    enrollmentIds.length
-      ? supabase
-          .from("grades")
-          .select("*")
-          .in("enrollment_id", enrollmentIds)
-      : Promise.resolve({ data: [] }),
-  ]);
-
-  const attendance = (attendanceData ?? []) as AttendanceRow[];
-  const grades = new Map(
-    ((gradeData ?? []) as Grade[]).map((grade) => [
-      grade.enrollment_id,
-      Number(grade.score),
-    ]),
+  const attendance: AttendanceRow[] = enrollments.flatMap((enrollment) =>
+    (enrollment.attendance ?? []).map((row) => ({
+      session_id: row.session_id,
+      enrollment_id: enrollment.id,
+      present: row.present,
+    })),
   );
 
+  const sessionIds = new Set(sessions.map((s) => s.id));
   const roster: RosterEntry[] = enrollments.map((enrollment) => ({
     enrollmentId: enrollment.id,
     name: enrollment.student?.full_name || "Participante",
     category: enrollment.category,
-    present: attendance.filter(
-      (row) => row.enrollment_id === enrollment.id && row.present,
-    ).length,
-    score: grades.get(enrollment.id) ?? null,
+    present: embeddedPresent(enrollment, sessionIds),
+    score: embeddedScore(enrollment),
   }));
 
   const requested =
@@ -107,34 +98,51 @@ export default async function InstructorCoursePage({
   return (
     <>
       <Link
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         href="/instructor"
       >
+        <Icon name="arrow_back" size={16} />
         Volver
       </Link>
-      <h1 className="mt-4 text-xl font-semibold tracking-tight text-foreground">
-        {typedCourse.name}
-      </h1>
-      <p className="mt-2 text-sm text-muted-foreground">
-        {typedCourse.hours} h · {typedCourse.schedule} · Nota mínima{" "}
-        {Number(typedCourse.nota_minima)} · Asistencia mínima{" "}
-        {Number(typedCourse.asistencia_minima)} %
-      </p>
+      <div className="mt-4">
+        <PageHeader
+          icon="co_present"
+          eyebrow="Gestión del curso"
+          title={typedCourse.name}
+          description={`${typedCourse.hours} h · ${courseScheduleLabel(typedCourse)}`}
+        />
+      </div>
+      <div className="mt-6 flex flex-wrap gap-2 text-xs">
+        {[
+          { icon: "event", text: `${sessions.length} sesiones` },
+          { icon: "group", text: `${roster.length} inscritos` },
+          { icon: "grade", text: `Nota mínima ${Number(typedCourse.nota_minima)}` },
+          { icon: "fact_check", text: `Asistencia mínima ${Number(typedCourse.asistencia_minima)} %` },
+        ].map((item) => (
+          <span
+            key={item.text}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 font-medium text-foreground"
+          >
+            <Icon name={item.icon} size={16} className="text-primary-soft-foreground" />
+            {item.text}
+          </span>
+        ))}
+      </div>
 
-      <section className="mt-10">
-        <h2 className="text-sm font-medium text-foreground">Sesiones</h2>
+      <section className="mt-10 rounded-[1.4rem] border border-border bg-card p-5 shadow-sm md:p-6">
+        <SectionTitle icon="event" title="Sesiones" />
         {sessions.length === 0 ? (
-          <p className="mt-4 text-sm text-muted-foreground">
-            Aún no hay sesiones registradas.
-          </p>
+          <div className="mt-4">
+            <EmptyState icon="event_busy" title="Aún no hay sesiones registradas" />
+          </div>
         ) : (
           <div className="mt-4 overflow-x-auto">
             <table className="w-full min-w-[560px] text-left text-sm">
-              <thead className="text-muted-foreground">
+              <thead className="text-xs uppercase tracking-wide text-muted-foreground">
                 <tr className="border-b border-border">
-                  <th className="py-2 pr-3 font-medium">Fecha</th>
-                  <th className="py-2 pr-3 font-medium">Tema</th>
-                  <th className="py-2 font-medium"> </th>
+                  <th className="py-2 pr-3 font-semibold">Fecha</th>
+                  <th className="py-2 pr-3 font-semibold">Tema</th>
+                  <th className="py-2 font-semibold"> </th>
                 </tr>
               </thead>
               <tbody>
@@ -143,8 +151,8 @@ export default async function InstructorCoursePage({
                     key={session.id}
                     className={
                       session.id === selected?.id
-                        ? "border-b border-border bg-muted"
-                        : "border-b border-border"
+                        ? "border-b border-border bg-primary-soft/60"
+                        : "border-b border-border hover:bg-muted/50"
                     }
                   >
                     <td className="py-3 pr-3 text-foreground">
@@ -154,7 +162,7 @@ export default async function InstructorCoursePage({
                     <td className="py-3 text-right">
                       <div className="flex items-start justify-end gap-3">
                         <Link
-                          className="text-foreground underline-offset-4 hover:underline"
+                          className="font-medium text-primary-soft-foreground underline-offset-4 hover:underline"
                           href={`/instructor/cursos/${id}?sesion=${session.id}`}
                           scroll={false}
                         >
@@ -172,13 +180,11 @@ export default async function InstructorCoursePage({
         <SessionForm courseId={id} />
       </section>
 
-      <section className="mt-12">
-        <h2 className="text-sm font-medium text-foreground">
-          Asistencia
-          {selected
-            ? ` · Sesión ${formatSessionDate(selected.session_date)}`
-            : ""}
-        </h2>
+      <section className="mt-6 rounded-[1.4rem] border border-border bg-card p-5 shadow-sm md:p-6">
+        <SectionTitle
+          icon="fact_check"
+          title={`Asistencia${selected ? ` · Sesión ${formatSessionDate(selected.session_date)}` : ""}`}
+        />
         {!selected ? (
           <p className="mt-4 text-sm text-muted-foreground">
             Agrega una sesión para registrar la asistencia.
@@ -204,8 +210,8 @@ export default async function InstructorCoursePage({
         )}
       </section>
 
-      <section className="mt-12">
-        <h2 className="text-sm font-medium text-foreground">Inscritos y notas</h2>
+      <section className="mt-6 rounded-[1.4rem] border border-border bg-card p-5 shadow-sm md:p-6">
+        <SectionTitle icon="grade" title="Inscritos y notas" />
         {roster.length === 0 ? (
           <p className="mt-4 text-sm text-muted-foreground">
             El curso no tiene participantes inscritos.
@@ -213,12 +219,12 @@ export default async function InstructorCoursePage({
         ) : (
           <div className="mt-4 overflow-x-auto">
             <table className="w-full min-w-[640px] text-left text-sm">
-              <thead className="text-muted-foreground">
+              <thead className="text-xs uppercase tracking-wide text-muted-foreground">
                 <tr className="border-b border-border">
-                  <th className="py-2 pr-3 font-medium">Participante</th>
-                  <th className="py-2 pr-3 font-medium">Categoría</th>
-                  <th className="py-2 pr-3 font-medium">Asistencia</th>
-                  <th className="py-2 text-right font-medium">Nota (0–100)</th>
+                  <th className="py-2 pr-3 font-semibold">Participante</th>
+                  <th className="py-2 pr-3 font-semibold">Categoría</th>
+                  <th className="py-2 pr-3 font-semibold">Asistencia</th>
+                  <th className="py-2 text-right font-semibold">Nota (0–100)</th>
                 </tr>
               </thead>
               <tbody>
@@ -246,5 +252,16 @@ export default async function InstructorCoursePage({
         )}
       </section>
     </>
+  );
+}
+
+function SectionTitle({ icon, title }: { icon: string; title: string }) {
+  return (
+    <h2 className="flex items-center gap-2 text-base font-semibold tracking-tight text-foreground">
+      <span className="flex size-8 items-center justify-center rounded-xl bg-primary-soft text-primary-soft-foreground">
+        <Icon name={icon} size={18} />
+      </span>
+      {title}
+    </h2>
   );
 }

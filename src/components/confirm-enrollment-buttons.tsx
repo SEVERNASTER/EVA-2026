@@ -68,7 +68,7 @@ export function ConfirmEnrollmentButtons({
         {scholarshipRequest ? (
           <>
             <button
-              className="inline-flex items-center gap-1 rounded-2xl bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
+              className="inline-flex items-center gap-1 rounded-2xl bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm disabled:opacity-50"
               type="button"
               disabled={pending !== null}
               onClick={() => setAsk("beca")}
@@ -88,7 +88,7 @@ export function ConfirmEnrollmentButtons({
         ) : (
           <>
             <button
-              className="inline-flex items-center gap-1 rounded-2xl bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
+              className="inline-flex items-center gap-1 rounded-2xl bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm disabled:opacity-50"
               type="button"
               disabled={pending !== null}
               onClick={() => setAsk("caja")}

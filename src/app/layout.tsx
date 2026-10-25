@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import { siteUrl } from "@/lib/certificates/types";
 import "./globals.css";
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -8,6 +9,7 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl()),
   title: "EVA 2026",
   description:
     "Plataforma de formación continua con certificación digital verificable",
