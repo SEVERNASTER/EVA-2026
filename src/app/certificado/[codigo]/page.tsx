@@ -104,7 +104,6 @@ export default async function CertificatePage({
   }
 
   const publicUrl = `${siteUrl()}${certificatePath(certificate.code)}`;
-  const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(publicUrl)}`;
   const issued = formatIssuedDate(certificate.issued_at);
 
   // Generar código QR en Base64 para el recuadro designado en la esquina inferior derecha
@@ -129,9 +128,7 @@ export default async function CertificatePage({
                 className="inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-3 py-1.5 text-xs font-semibold text-primary-soft-foreground transition-colors hover:bg-primary-soft/80"
               >
                 <Icon name="verified_user" filled size={16} />
-                {certificate.is_validated
-                  ? `Validado por Admin (${profile?.full_name})`
-                  : "Pendiente: Validar ahora en panel"}
+                Consultar este código
               </Link>
             ) : null}
             <p className="inline-flex items-center gap-2 rounded-full bg-white/12 px-3.5 py-1.5 text-sm font-medium text-white ring-1 ring-inset ring-white/20">
@@ -265,7 +262,6 @@ export default async function CertificatePage({
           Rota tu dispositivo horizontalmente para una vista ampliada del certificado.
         </p>
 
-        {/* Acciones de descarga y compartir */}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <a
             className="auth-submit inline-flex h-11 items-center gap-2 rounded-2xl bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-md transition-transform hover:-translate-y-0.5 active:translate-y-0"
@@ -274,15 +270,6 @@ export default async function CertificatePage({
           >
             <Icon name="download" size={18} />
             Descargar PDF Oficial
-          </a>
-          <a
-            className="inline-flex h-11 items-center gap-2 rounded-2xl border border-border bg-card px-5 text-sm font-semibold text-foreground transition-colors hover:bg-muted"
-            href={linkedInUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Icon name="share" size={18} />
-            Compartir en LinkedIn
           </a>
         </div>
 

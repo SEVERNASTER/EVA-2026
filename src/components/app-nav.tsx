@@ -9,7 +9,7 @@ const NAV: Record<UserRole, { href: string; label: string; icon: string }[]> = {
   admin: [
     { href: "/admin", label: "Cursos", icon: "menu_book" },
     { href: "/admin/inscripciones", label: "Inscripciones", icon: "how_to_reg" },
-    { href: "/admin/verificar", label: "Validar código", icon: "verified" },
+    { href: "/admin/verificar", label: "Consultar código", icon: "verified" },
   ],
   instructor: [{ href: "/instructor", label: "Mis cursos", icon: "co_present" }],
   estudiante: [{ href: "/estudiante", label: "Cursos", icon: "school" }],

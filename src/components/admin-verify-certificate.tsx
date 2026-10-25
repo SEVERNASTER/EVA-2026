@@ -3,8 +3,8 @@
 import { useActionState, useState } from "react";
 import Link from "next/link";
 import {
-  validateCertificateAdmin,
-  type AdminValidationResult,
+  lookupCertificateAdmin,
+  type CertificateLookupResult,
 } from "@/app/actions/certificates";
 import { Badge } from "@/components/ui/badge";
 import { Icon } from "@/components/ui/icon";
@@ -15,39 +15,39 @@ import {
 
 export function AdminVerifyCertificate({
   initialCode = "",
-  adminName,
 }: {
   initialCode?: string;
-  adminName: string;
 }) {
   const [code, setCode] = useState(initialCode);
 
   async function action(
-    _prev: AdminValidationResult | null,
+    _prev: CertificateLookupResult | null,
     formData: FormData,
-  ): Promise<AdminValidationResult> {
-    const rawCode = String(formData.get("code") ?? "").trim();
-    return validateCertificateAdmin(rawCode);
+  ): Promise<CertificateLookupResult> {
+    return lookupCertificateAdmin(String(formData.get("code") ?? "").trim());
   }
 
   const [state, formAction, pending] = useActionState(action, null);
+  const issued =
+    state?.ok &&
+    (state.certificate.is_validated === true ||
+      state.certificate.status === "APPROVED");
 
   return (
     <div className="mt-6 max-w-3xl">
-      {/* Formulario de búsqueda/validación de código */}
       <form
         action={formAction}
         className="rounded-[1.4rem] border border-border bg-card p-6 shadow-sm"
       >
         <label htmlFor="code" className="block text-sm font-semibold text-foreground">
-          Ingresa el Código de Verificación
+          Código de verificación
         </label>
         <p className="mt-1 text-xs text-muted-foreground">
-          Código alfanumérico único de 8 caracteres emitido para el certificado (ej: 8F72A91C).
+          8 caracteres del diploma (ej: 8F72A91C). Solo consulta autenticidad.
         </p>
 
         <div className="mt-4 flex flex-wrap gap-3">
-          <div className="relative flex-1 min-w-[220px]">
+          <div className="relative min-w-[220px] flex-1">
             <input
               id="code"
               name="code"
@@ -56,8 +56,8 @@ export function AdminVerifyCertificate({
               maxLength={8}
               placeholder="Ej: 8F72A91C"
               value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
-              className="auth-field h-11 w-full font-mono uppercase tracking-widest text-base font-bold rounded-2xl border border-border bg-background px-4 text-foreground placeholder:font-normal placeholder:tracking-normal placeholder:text-muted-foreground"
+              onChange={(event) => setCode(event.target.value.toUpperCase())}
+              className="auth-field h-11 w-full rounded-2xl border border-border bg-background px-4 font-mono text-base font-bold uppercase tracking-widest text-foreground placeholder:font-normal placeholder:tracking-normal placeholder:text-muted-foreground"
             />
           </div>
           <button
@@ -65,16 +65,15 @@ export function AdminVerifyCertificate({
             disabled={pending || !code.trim()}
             className="auth-submit inline-flex h-11 items-center gap-2 rounded-2xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm disabled:opacity-50"
           >
-            <Icon name="verified" size={18} />
-            {pending ? "Validando..." : "Validar Certificado"}
+            <Icon name="search" size={18} />
+            {pending ? "Consultando…" : "Consultar"}
           </button>
         </div>
       </form>
 
-      {/* Resultado de la validación */}
       {state ? (
         <div className="mt-6">
-          {state.ok ? (
+          {state.ok && issued ? (
             <div className="rounded-[1.4rem] border border-emerald-500/30 bg-emerald-500/5 p-6 shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-emerald-500/20 pb-4">
                 <div className="flex items-center gap-2.5">
@@ -83,10 +82,10 @@ export function AdminVerifyCertificate({
                   </span>
                   <div>
                     <h2 className="text-base font-bold text-foreground">
-                      Certificado Válido y Autenticado
+                      Certificado emitido
                     </h2>
                     <p className="text-xs text-muted-foreground">
-                      Registro oficial confirmado en la base de datos de la UMSS
+                      El código coincide con un diploma oficial de EVA
                     </p>
                   </div>
                 </div>
@@ -94,66 +93,30 @@ export function AdminVerifyCertificate({
               </div>
 
               <dl className="mt-4 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-xl border border-border/60 bg-card p-3">
-                  <dt className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                    Participante
-                  </dt>
-                  <dd className="mt-1 text-base font-bold text-foreground">
-                    {state.certificate.participant_name}
-                  </dd>
-                </div>
-
-                <div className="rounded-xl border border-border/60 bg-card p-3">
-                  <dt className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                    Curso Aprobado
-                  </dt>
-                  <dd className="mt-1 text-base font-semibold text-primary">
-                    {state.certificate.course_name}
-                  </dd>
-                </div>
-
-                <div className="rounded-xl border border-border/60 bg-card p-3">
-                  <dt className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                    Duración Académica
-                  </dt>
-                  <dd className="mt-1 text-sm font-semibold text-foreground">
-                    {state.certificate.hours} horas académicas
-                  </dd>
-                </div>
-
-                <div className="rounded-xl border border-border/60 bg-card p-3">
-                  <dt className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                    Docente Instructor
-                  </dt>
-                  <dd className="mt-1 text-sm font-semibold text-foreground">
-                    {state.certificate.instructor_name || "Docente Titular"}
-                  </dd>
-                </div>
-
-                <div className="rounded-xl border border-border/60 bg-card p-3">
-                  <dt className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                    Fecha de Emisión Original
-                  </dt>
-                  <dd className="mt-1 text-sm font-semibold text-foreground">
-                    {formatIssuedDate(state.certificate.issued_at)}
-                  </dd>
-                </div>
-
-                <div className="rounded-xl border border-border/60 bg-card p-3">
-                  <dt className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                    Código Verificado
-                  </dt>
-                  <dd className="mt-1 font-mono text-base font-extrabold tracking-widest text-foreground">
-                    {state.certificate.code}
-                  </dd>
-                </div>
+                <LookupField label="Participante" value={state.certificate.participant_name} />
+                <LookupField
+                  label="Curso aprobado"
+                  value={state.certificate.course_name}
+                  accent
+                />
+                <LookupField
+                  label="Duración"
+                  value={`${state.certificate.hours} horas académicas`}
+                />
+                <LookupField
+                  label="Docente"
+                  value={state.certificate.instructor_name || "Docente titular"}
+                />
+                <LookupField
+                  label="Fecha de emisión"
+                  value={formatIssuedDate(state.certificate.issued_at)}
+                />
+                <LookupField
+                  label="Código"
+                  value={state.certificate.code}
+                  mono
+                />
               </dl>
-
-              <div className="mt-4 rounded-xl bg-muted/60 px-4 py-2.5 text-xs text-muted-foreground">
-                <span className="font-semibold text-foreground">Validado por:</span> {adminName} ·{" "}
-                <span className="font-semibold text-foreground">Fecha de validación:</span>{" "}
-                {new Date(state.validatedAt).toLocaleString("es-BO")}
-              </div>
 
               <div className="mt-5 flex flex-wrap gap-3">
                 <Link
@@ -162,7 +125,7 @@ export function AdminVerifyCertificate({
                   className="auth-submit inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-4 text-xs font-semibold text-primary-foreground shadow-xs"
                 >
                   <Icon name="visibility" size={16} />
-                  Ver Certificado Oficial
+                  Ver certificado
                 </Link>
                 <a
                   href={`${certificatePath(state.certificate.code)}/pdf`}
@@ -174,6 +137,23 @@ export function AdminVerifyCertificate({
                 </a>
               </div>
             </div>
+          ) : state.ok ? (
+            <div className="rounded-[1.4rem] border border-amber-500/30 bg-card p-6 shadow-sm">
+              <div className="flex items-center gap-2.5">
+                <span className="flex size-9 items-center justify-center rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-200">
+                  <Icon name="pending" size={20} />
+                </span>
+                <div>
+                  <h2 className="text-base font-bold text-foreground">
+                    Código aún no oficial
+                  </h2>
+                  <p className="text-xs text-muted-foreground">
+                    Existe un registro para {state.certificate.code}, pero administración
+                    todavía no lo emitió. Emite desde Inscripciones.
+                  </p>
+                </div>
+              </div>
+            </div>
           ) : (
             <div className="rounded-[1.4rem] border border-destructive/30 bg-destructive/5 p-6 shadow-sm">
               <div className="flex items-center gap-2.5">
@@ -182,11 +162,9 @@ export function AdminVerifyCertificate({
                 </span>
                 <div>
                   <h2 className="text-base font-bold text-destructive">
-                    Certificado No Válido
+                    Certificado no encontrado
                   </h2>
-                  <p className="text-xs text-destructive/80">
-                    {state.error}
-                  </p>
+                  <p className="text-xs text-destructive/80">{state.error}</p>
                 </div>
               </div>
             </div>
@@ -197,3 +175,33 @@ export function AdminVerifyCertificate({
   );
 }
 
+function LookupField({
+  label,
+  value,
+  accent = false,
+  mono = false,
+}: {
+  label: string;
+  value: string;
+  accent?: boolean;
+  mono?: boolean;
+}) {
+  return (
+    <div className="rounded-xl border border-border/60 bg-card p-3">
+      <dt className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+        {label}
+      </dt>
+      <dd
+        className={
+          mono
+            ? "mt-1 font-mono text-base font-extrabold tracking-widest text-foreground"
+            : accent
+              ? "mt-1 text-base font-semibold text-primary"
+              : "mt-1 text-base font-semibold text-foreground"
+        }
+      >
+        {value}
+      </dd>
+    </div>
+  );
+}
