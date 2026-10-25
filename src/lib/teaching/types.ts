@@ -35,6 +35,30 @@ export type CourseProgress = {
   score: number | null;
 };
 
+/** Asistencia y nota embebidas en la consulta de inscripciones (una sola ida a la base). */
+export type EnrollmentTeachingEmbed = {
+  attendance?: { session_id: string; present: boolean }[] | null;
+  grades?: { score: number } | { score: number }[] | null;
+};
+
+export const ENROLLMENT_TEACHING_SELECT =
+  "attendance(session_id, present), grades(score)";
+
+/** PostgREST devuelve una relación 1:1 como objeto o como arreglo según la versión. */
+export function embeddedOne<T>(value: T | T[] | null | undefined): T | null {
+  if (Array.isArray(value)) return value[0] ?? null;
+  return value ?? null;
+}
+
+export function embeddedScore(row: EnrollmentTeachingEmbed) {
+  const grade = embeddedOne(row.grades);
+  return grade ? Number(grade.score) : null;
+}
+
+export function embeddedPresent(row: EnrollmentTeachingEmbed, validSessionIds?: Set<string>) {
+  return (row.attendance ?? []).filter((entry) => entry.present && (!validSessionIds || validSessionIds.has(entry.session_id))).length;
+}
+
 export function attendancePercent(present: number, total: number) {
   if (total === 0) {
     return 0;

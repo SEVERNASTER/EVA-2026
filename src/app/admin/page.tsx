@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { AdminCourseTable } from "@/components/admin-course-table";
 import { Icon } from "@/components/ui/icon";
+import { PageHeader } from "@/components/ui/page-header";
+import { StatCard, StatGrid } from "@/components/ui/stat-card";
 import { requireRole } from "@/lib/auth/guards";
 import type { Course } from "@/lib/courses/types";
 import { createClient } from "@/lib/supabase/server";
@@ -15,25 +17,37 @@ export default async function AdminPage() {
 
   const courses = (data ?? []) as Course[];
 
+  const published = courses.filter((course) => course.published).length;
+  const totalHours = courses.reduce((sum, course) => sum + course.hours, 0);
+
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight text-foreground">
-            Cursos
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {courses.length} cursos en el catálogo interno
-          </p>
-        </div>
-        <Link
-          className="auth-submit inline-flex h-11 items-center gap-2 rounded-2xl bg-primary px-4 text-sm font-medium text-primary-foreground"
-          href="/admin/cursos/nuevo"
-        >
-          <Icon name="add" size={18} />
-          Nuevo curso
-        </Link>
-      </div>
+      <PageHeader
+        icon="menu_book"
+        eyebrow="Administración"
+        title="Cursos"
+        description="Crea la oferta, define los criterios de aprobación y publica lo que los estudiantes pueden ver."
+        actions={
+          <Link
+            className="auth-submit inline-flex h-11 items-center gap-2 rounded-2xl bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm"
+            href="/admin/cursos/nuevo"
+          >
+            <Icon name="add" size={18} />
+            Nuevo curso
+          </Link>
+        }
+      />
+      <StatGrid>
+        <StatCard icon="library_books" label="En el catálogo" value={courses.length} hint="Cursos registrados" />
+        <StatCard
+          icon="public"
+          label="Publicados"
+          value={published}
+          hint={`${courses.length - published} en borrador`}
+          tone="success"
+        />
+        <StatCard icon="schedule" label="Horas ofertadas" value={`${totalHours} h`} hint="Suma de todos los cursos" tone="gold" />
+      </StatGrid>
       <AdminCourseTable courses={courses} />
     </>
   );

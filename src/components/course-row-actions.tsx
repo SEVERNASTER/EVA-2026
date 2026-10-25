@@ -48,7 +48,7 @@ export function CourseRowActions({
     <div ref={rootRef} className="relative flex justify-end">
       <button
         type="button"
-        className="inline-flex size-9 items-center justify-center rounded-2xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
+        className="inline-flex size-9 items-center justify-center rounded-2xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={`Acciones de ${name}`}

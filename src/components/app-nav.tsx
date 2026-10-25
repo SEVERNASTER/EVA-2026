@@ -9,8 +9,9 @@ const NAV: Record<UserRole, { href: string; label: string; icon: string }[]> = {
   admin: [
     { href: "/admin", label: "Cursos", icon: "menu_book" },
     { href: "/admin/inscripciones", label: "Inscripciones", icon: "how_to_reg" },
+    { href: "/admin/verificar", label: "Consultar código", icon: "verified" },
   ],
-  instructor: [{ href: "/instructor", label: "Cursos", icon: "menu_book" }],
+  instructor: [{ href: "/instructor", label: "Mis cursos", icon: "co_present" }],
   estudiante: [{ href: "/estudiante", label: "Cursos", icon: "school" }],
 };
 
@@ -36,7 +37,7 @@ export function AppNav({
       className={
         horizontal
           ? "flex gap-1 overflow-x-auto text-sm"
-          : "flex flex-1 flex-col gap-1.5 p-3 text-sm"
+          : "flex flex-1 flex-col gap-1 px-3 py-2 text-sm"
       }
     >
       {NAV[role].map((item) => {
@@ -47,8 +48,8 @@ export function AppNav({
             href={item.href}
             className={
               active
-                ? "flex items-center gap-2.5 rounded-2xl bg-sidebar-accent px-3 py-2.5 font-medium text-sidebar-accent-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
-                : "flex items-center gap-2.5 rounded-2xl px-3 py-2.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
+                ? "relative flex shrink-0 items-center gap-2.5 rounded-2xl bg-sidebar-accent px-3 py-2.5 font-semibold text-sidebar-accent-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                : "flex shrink-0 items-center gap-2.5 rounded-2xl px-3 py-2.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             }
           >
             <Icon name={item.icon} filled={active} size={20} />

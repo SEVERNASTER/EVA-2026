@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { saveGrade } from "@/app/actions/teaching";
 
 type State = { error: string } | { ok: true } | null;
@@ -14,18 +15,26 @@ export function GradeForm({
   enrollmentId: string;
   score: number | null;
 }) {
+  const router = useRouter();
+
   async function action(_prev: State, formData: FormData): Promise<State> {
     return saveGrade(courseId, enrollmentId, formData);
   }
 
   const [state, formAction, pending] = useActionState(action, null);
 
+  useEffect(() => {
+    if (state && "ok" in state) {
+      router.refresh();
+    }
+  }, [state, router]);
+
   return (
     <form action={formAction} className="flex flex-col items-end gap-1">
       <div className="flex items-center gap-2">
         <input
           aria-label="Nota"
-          className="auth-field h-9 w-20 rounded-2xl border border-border bg-background px-2 text-right text-sm text-foreground"
+          className="auth-field h-9 w-20 rounded-2xl border border-input bg-card px-2 text-right text-sm text-foreground"
           name="score"
           type="number"
           min={0}
@@ -46,7 +55,7 @@ export function GradeForm({
         <p className="text-xs text-destructive">{state.error}</p>
       ) : null}
       {state && "ok" in state && !pending ? (
-        <p className="text-xs text-accent-foreground">Guardada.</p>
+        <p className="text-xs text-success-foreground">Guardada.</p>
       ) : null}
     </form>
   );
